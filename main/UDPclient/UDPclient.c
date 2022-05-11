@@ -73,7 +73,7 @@ int initialization( struct sockaddr ** internet_address, socklen_t * internet_ad
 	memset( &internet_address_setup, 0, sizeof internet_address_setup );
 	internet_address_setup.ai_family = AF_UNSPEC;
 	internet_address_setup.ai_socktype = SOCK_DGRAM;
-	int getaddrinfo_return = getaddrinfo( "127.0.0.1", "50000", &internet_address_setup, &internet_address_result );
+	int getaddrinfo_return = getaddrinfo( "192.168.0.101", "50000", &internet_address_setup, &internet_address_result );
 	if( getaddrinfo_return != 0 )
 	{
 		fprintf( stderr, "getaddrinfo: %s\n", gai_strerror( getaddrinfo_return ) );
@@ -112,14 +112,37 @@ int initialization( struct sockaddr ** internet_address, socklen_t * internet_ad
 
 void execution( int internet_socket, struct sockaddr * internet_address, socklen_t internet_address_length )
 {
+	int amountOfPacketsToSend = 0;
+	int lenghtOfContentPacketToSend;
+	char contentPacketToSend[180] = {};
+	printf("How many packets do you want to send?\n");
+	scanf("%d",&amountOfPacketsToSend);
+
+	printf("What should the content of the packet be?\n");
+	scanf("%s",&contentPacketToSend);
+
+	//Adds NUL terminator to the end of the stings and gets the bytes for sendto function.
+	lenghtOfContentPacketToSend = strlen(contentPacketToSend);
+	contentPacketToSend[lenghtOfContentPacketToSend] = '\0';
+	
+	printf("\nSending %s %d times.\n",contentPacketToSend, amountOfPacketsToSend);
+
+
 	int number_of_bytes_send = 0;
-	number_of_bytes_send = sendto( internet_socket, "Hello UDP world!", 16, 0, internet_address, internet_address_length );
-    sendto( internet_socket, "Hello UDP world!", 16, 0, internet_address, internet_address_length );
-    sendto( internet_socket, "Hello UDP world!", 16, 0, internet_address, internet_address_length );
+	number_of_bytes_send = sendto( internet_socket, contentPacketToSend, lenghtOfContentPacketToSend, 0, internet_address, internet_address_length );
 	if( number_of_bytes_send == -1 )
 	{
 		perror( "sendto" );
 	}
+	printf("\n\nPacket [ 1 ] sent.\n");
+
+	for (size_t i = 1; i < amountOfPacketsToSend; i++)
+	{
+		sendto( internet_socket, contentPacketToSend, lenghtOfContentPacketToSend, 0, internet_address, internet_address_length );
+		printf("Packet [ %d ] sent.\n",i+1);
+	}
+	printf("All packets sent.\n\n");
+	printf("Waitng for response from server...\n");
 
 	int number_of_bytes_received = 0;
 	char buffer[1000];
@@ -131,8 +154,10 @@ void execution( int internet_socket, struct sockaddr * internet_address, socklen
 	else
 	{
 		buffer[number_of_bytes_received] = '\0';
-		printf( "Received : %s\n", buffer );
+		printf("Received : %s\n", buffer );
 	}
+
+	printf("Shutting down.");
 }
 
 void cleanup( int internet_socket, struct sockaddr * internet_address )
