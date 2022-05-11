@@ -6,6 +6,15 @@
 	#include <unistd.h> //for close
 	#include <stdlib.h> //for exit
 	#include <string.h> //for memset
+	void OSInit(void)
+	{
+		WSADATA wsaData;
+		WSAStartup( MAKEWORD( 2, 0 ), &wsaData ); 
+	}
+	void OSCleanup(void)
+	{
+		WSACleanup();
+	}
 #else
 	#include <sys/socket.h> //for sockaddr, socket, socket
 	#include <sys/types.h> //for size_t
@@ -17,8 +26,10 @@
 	#include <unistd.h> //for close
 	#include <stdlib.h> //for exit
 	#include <string.h> //for memset
+	void OSInit( void ) {}
+	void OSCleanup( void ) {}
 #endif
-
+    
 /*
 *
 *   Code written by Axel Vanherle.
@@ -26,56 +37,66 @@
 *
 */
 
-void initialize (void);
+int initialization( struct sockaddr ** internet_address, socklen_t * internet_address_length );
 
-void execute (void);
+void execution( int internet_socket, struct sockaddr * internet_address, socklen_t internet_address_length );
 
-void cleanup (void);
+void cleanup( int internet_socket, struct sockaddr * internet_address );
 
 int main()
 {
+	OSInit(); //Only needed for windows, has no use when on UNIX OS
 
-    WSADATA wsaData;
-	WSAStartup( MAKEWORD(2,0), &wsaData );
+	struct sockaddr * internet_address = NULL;
+	socklen_t internet_address_length = 0;
+	int internet_socket = initialization(&internet_address, &internet_address_length);
 
-    struct addrinfo internet_address_setup;
-	struct addrinfo *internet_address = NULL;
+	execution(internet_socket, internet_address, internet_address_length);
+
+	cleanup(internet_socket, internet_address);
+
+	OSCleanup();
+
+	return 0;
+}
+
+int initialization(struct sockaddr ** internet_address, socklen_t * internet_address_length)
+{
+	struct addrinfo internet_address_setup;
+	struct addrinfo * internet_address_result;
 	memset( &internet_address_setup, 0, sizeof internet_address_setup );
 	internet_address_setup.ai_family = AF_UNSPEC; //IPV4 or IPV6. We dont care.
 	internet_address_setup.ai_socktype = SOCK_DGRAM; //UDP packet.
-	getaddrinfo( "127.0.0.1", "50000", &internet_address_setup, &internet_address );
+	getaddrinfo("127.0.0.1", "50000", &internet_address_setup, &internet_address_result );
 
-    int internet_socket;
-	internet_socket = socket( internet_address->ai_family, internet_address->ai_socktype, internet_address->ai_protocol );
+	int internet_socket;
+	internet_socket = socket(internet_address_result->ai_family, internet_address_result->ai_socktype, internet_address_result->ai_protocol );
 
-    sendto( internet_socket, "Hello UDP server!", 17, 0, internet_address->ai_addr, internet_address->ai_addrlen );
+	*internet_address_length = internet_address_result->ai_addrlen;
+	*internet_address = (struct sockaddr *) malloc(internet_address_result->ai_addrlen );
+	memcpy(*internet_address, internet_address_result->ai_addr, internet_address_result->ai_addrlen );
 
-    int number_of_bytes_received = 0;
+	freeaddrinfo(internet_address_result);
+
+	return internet_socket;
+}
+
+void execution(int internet_socket, struct sockaddr * internet_address, socklen_t internet_address_length)
+{
+	sendto(internet_socket, "Hello UDP world!", 16, 0, internet_address, internet_address_length);
+
+	int number_of_bytes_received = 0;
 	char buffer[1000];
-	socklen_t internet_address_length = internet_address->ai_addrlen;
-	number_of_bytes_received = recvfrom( internet_socket, buffer, ( sizeof buffer ) - 1, 0, internet_address->ai_addr, &internet_address_length );
+	number_of_bytes_received = recvfrom( internet_socket, buffer, ( sizeof buffer ) - 1, 0, internet_address, &internet_address_length );
 	buffer[number_of_bytes_received] = '\0';
-	printf( "Received: %s\n", buffer );
+	printf("Received : %s\n", buffer );
+}
 
-    freeaddrinfo( internet_address );
+void cleanup( int internet_socket, struct sockaddr * internet_address )
+{
+	//Step 3.2
+	free( internet_address );
+
+	//Step 3.1
 	close( internet_socket );
-    WSACleanup();
-    printf("Compiler works!\n");
-    return 0;
-
-}
-
-void initialize (void)
-{
-    
-}
-
-void execute (void)
-{
-    
-}
-
-void cleanup (void)
-{
-    
 }
