@@ -42,11 +42,24 @@ void cleanup( int internet_socket );
 
 int main( int argc, char * argv[] )
 {
+	//////////////////
+	//Initialization//
+	//////////////////
+
 	OSInit();
 
 	int internet_socket = initialization();
 
+	/////////////
+	//Execution//
+	/////////////
+
 	execution( internet_socket );
+
+
+	////////////
+	//Clean up//
+	////////////
 
 	cleanup( internet_socket );
 
@@ -57,6 +70,7 @@ int main( int argc, char * argv[] )
 
 int initialization()
 {
+	//Step 1.1
 	struct addrinfo internet_address_setup;
 	struct addrinfo * internet_address_result;
 	memset( &internet_address_setup, 0, sizeof internet_address_setup );
@@ -74,13 +88,15 @@ int initialization()
 	struct addrinfo * internet_address_result_iterator = internet_address_result;
 	while( internet_address_result_iterator != NULL )
 	{
+		//Step 1.2
 		internet_socket = socket( internet_address_result_iterator->ai_family, internet_address_result_iterator->ai_socktype, internet_address_result_iterator->ai_protocol );
 		if( internet_socket == -1 )
 		{
 			perror( "socket" );
 		}
 		else
-        {
+		{
+			//Step 1.3
 			int bind_return = bind( internet_socket, internet_address_result_iterator->ai_addr, internet_address_result_iterator->ai_addrlen );
 			if( bind_return == -1 )
 			{
@@ -135,5 +151,6 @@ void execution( int internet_socket )
 
 void cleanup( int internet_socket )
 {
+	//Step 3.1
 	close( internet_socket );
 }
