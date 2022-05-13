@@ -197,6 +197,8 @@ void execution( int internet_socket )
 		if (setsockopt(internet_socket, SOL_SOCKET, SO_RCVTIMEO,&timeout,sizeof(timeout)) < 0)
 		{
        		perror("Error");
+			fprintf(stderr, "test\n");
+			fprintf(stdout, "test\n");
     	}
 
 		clock_t begin = clock();
