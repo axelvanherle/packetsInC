@@ -13,13 +13,13 @@ Je maakt een 4 applicaties (UDP Client, UDP Server, TCP Client en TCP Server) di
  
  - [X] Werkende Server applicatie die gegevens via UDP ontvangt (bewijs Packet Sender) [2/15]
  
- - [ ] CSV van ontvangen stream wordt aangemaakt [1/15]
+ - [X] CSV van ontvangen stream wordt aangemaakt [1/15]
  
  - [X] Het aantal pakketten dat ontvangen is wordt bijgehouden [1/15]
  
  - [X] Er is een aantal te ontvangen pakketten in te stellen [1/15]
  
- - [ ] Het tijdsverschil tussen eerste en laatste pakket wordt getoond [1/15]
+ - [X] Het tijdsverschil tussen eerste en laatste pakket wordt getoond [1/15]
  
  - [ ] *Er is een time-out in te stellen [2/15]
  
