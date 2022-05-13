@@ -7,11 +7,11 @@ Je maakt een 4 applicaties (UDP Client, UDP Server, TCP Client en TCP Server) di
 
  Welke onderdelen zijn behaald van de UDP Client ?
  
- - [ ] Werkende Client applicatie die aantal te sturen packetten via UDP stuurt (bewijs Packet Sender) [2/15]
+ - [X] Werkende Client applicatie die aantal te sturen packetten via UDP stuurt (bewijs Packet Sender) [2/15]
  
- - [ ] Welke onderdelen zijn behaald van de UDP Server ?
+ Welke onderdelen zijn behaald van de UDP Server ?
  
- - [ ] Werkende Server applicatie die gegevens via UDP ontvangt (bewijs Packet Sender) [2/15]
+ - [X] Werkende Server applicatie die gegevens via UDP ontvangt (bewijs Packet Sender) [2/15]
  
  - [ ] CSV van ontvangen stream wordt aangemaakt [1/15]
  
