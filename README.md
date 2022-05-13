@@ -21,7 +21,7 @@ Je maakt een 4 applicaties (UDP Client, UDP Server, TCP Client en TCP Server) di
  
  - [X] Het tijdsverschil tussen eerste en laatste pakket wordt getoond [1/15]
  
- - [ ] *Er is een time-out in te stellen [2/15]
+ - [X] *Er is een time-out in te stellen [2/15]
  
  - [ ] *Bij time-out het aantal effectief ontvangen t.o.v. verwacht aantal wordt getoond met berekening van packetloss [2/15]
  
