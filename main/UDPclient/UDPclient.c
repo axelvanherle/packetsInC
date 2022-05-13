@@ -7,7 +7,7 @@
 */
 
 #ifdef _WIN32
-    
+
 	#define _WIN32_WINNT _WIN32_WINNT_WIN7
 	#include <winsock2.h> //for all socket programming
 	#include <ws2tcpip.h> //for getaddrinfo, inet_pton, inet_ntop
@@ -18,7 +18,7 @@
 	void OSInit( void )
 	{
 		WSADATA wsaData;
-		int WSAError = WSAStartup( MAKEWORD( 2, 0 ), &wsaData ); 
+		int WSAError = WSAStartup( MAKEWORD( 2, 0 ), &wsaData );
 		if( WSAError != 0 )
 		{
 			fprintf( stderr, "WSAStartup errno = %d\n", WSAError );
@@ -73,7 +73,7 @@ int initialization( struct sockaddr ** internet_address, socklen_t * internet_ad
 	memset( &internet_address_setup, 0, sizeof internet_address_setup );
 	internet_address_setup.ai_family = AF_UNSPEC;
 	internet_address_setup.ai_socktype = SOCK_DGRAM;
-	int getaddrinfo_return = getaddrinfo( "127.0.0.1", "50000", &internet_address_setup, &internet_address_result );
+	int getaddrinfo_return = getaddrinfo( "192.168.1.65", "24020", &internet_address_setup, &internet_address_result );
 	if( getaddrinfo_return != 0 )
 	{
 		fprintf( stderr, "getaddrinfo: %s\n", gai_strerror( getaddrinfo_return ) );
@@ -124,7 +124,7 @@ void execution( int internet_socket, struct sockaddr * internet_address, socklen
 	//Adds NUL terminator to the end of the stings and gets the bytes for sendto function.
 	lenghtOfContentPacketToSend = strlen(contentPacketToSend);
 	contentPacketToSend[lenghtOfContentPacketToSend] = '\0';
-	
+
 	printf("\nSending %s %d times.\n",contentPacketToSend, amountOfPacketsToSend);
 
 
@@ -136,7 +136,7 @@ void execution( int internet_socket, struct sockaddr * internet_address, socklen
 	}
 	printf("\n\nPacket [ 1 ] sent.\n");
 
-	for (size_t i = 1; i < amountOfPacketsToSend; i++)
+	for (int i = 1; i < amountOfPacketsToSend; i++)
 	{
 		sendto( internet_socket, contentPacketToSend, lenghtOfContentPacketToSend, 0, internet_address, internet_address_length );
 		printf("Packet [ %d ] sent.\n",i+1);

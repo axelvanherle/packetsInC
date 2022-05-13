@@ -6,6 +6,7 @@
 	#include <unistd.h> //for close
 	#include <stdlib.h> //for exit
 	#include <string.h> //for memset
+	#include <time.h> //for clock
 	void OSInit( void )
 	{
 		WSADATA wsaData;
@@ -32,9 +33,12 @@
 	#include <unistd.h> //for close
 	#include <stdlib.h> //for exit
 	#include <string.h> //for memset
+	#include <time.h> //for clock
 	int OSInit( void ) {}
 	int OSCleanup( void ) {}
 #endif
+
+int numberOfPacketsReceived = 0;
 
 int initialization();
 void execution( int internet_socket );
@@ -60,7 +64,7 @@ int initialization()
 	struct addrinfo internet_address_setup;
 	struct addrinfo * internet_address_result;
 	memset( &internet_address_setup, 0, sizeof internet_address_setup );
-	internet_address_setup.ai_family = AF_UNSPEC;
+	internet_address_setup.ai_family = AF_INET;
 	internet_address_setup.ai_socktype = SOCK_DGRAM;
 	internet_address_setup.ai_flags = AI_PASSIVE;
 	int getaddrinfo_return = getaddrinfo( NULL, "24042", &internet_address_setup, &internet_address_result );
@@ -108,29 +112,90 @@ int initialization()
 
 void execution( int internet_socket )
 {
-	//Step 2.1
+	FILE *OUTPUTFILE;
+    OUTPUTFILE = fopen("receivedPackets.csv", "w+");
+	int userChoice = 0;
 	int number_of_bytes_received = 0;
 	char buffer[1000];
 	struct sockaddr_storage client_internet_address;
 	socklen_t client_internet_address_length = sizeof client_internet_address;
-	number_of_bytes_received = recvfrom( internet_socket, buffer, ( sizeof buffer ) - 1, 0, (struct sockaddr *) &client_internet_address, &client_internet_address_length );
-	if( number_of_bytes_received == -1 )
-	{
-		perror( "recvfrom" );
-	}
-	else
-	{
-		buffer[number_of_bytes_received] = '\0';
-		printf( "Received : %s\n", buffer );
+
+	system("ipconfig");
+	printf("\n\n--------------------------------------");
+	printf("\nServer started. Find your IPV4 IP above.\n");
+	printf("\nWhat do you want to do?\n");
+	printf("[ 1 ] - Receive unlimited packets.\n");
+	printf("[ 2 ] - Set the amount of packets to receive.\n");
+	printf("Enter your choice: ");
+	scanf("%d",&userChoice);
+
+
+	if (userChoice == 1)
+	{	
+		while(1)
+		{
+			number_of_bytes_received = recvfrom( internet_socket, buffer, ( sizeof buffer ) - 1, 0, (struct sockaddr *) &client_internet_address, &client_internet_address_length );
+			if( number_of_bytes_received == -1 )
+			{
+				perror( "recvfrom" );
+			}
+			else
+			{
+				numberOfPacketsReceived++;
+				buffer[number_of_bytes_received] = '\0';
+				printf( "Packet [ %d ]: %s\n",numberOfPacketsReceived, buffer);
+				fprintf(OUTPUTFILE,"Packet [ %d ]: %s\n",numberOfPacketsReceived, buffer);
+			}
+
+			int number_of_bytes_send = 0;
+			number_of_bytes_send = sendto( internet_socket, "PACKET RECEIVED", 16, 0, (struct sockaddr *) &client_internet_address, client_internet_address_length );
+			if( number_of_bytes_send == -1 )
+			{
+				perror( "sendto" );
+			}
+		}
 	}
 
-	//Step 2.2
-	int number_of_bytes_send = 0;
-	number_of_bytes_send = sendto( internet_socket, "Hello UDP world!", 16, 0, (struct sockaddr *) &client_internet_address, client_internet_address_length );
-	if( number_of_bytes_send == -1 )
+	else if (userChoice == 2)
 	{
-		perror( "sendto" );
+		int amountOfPacketsToReceive = 0;
+
+		printf("\nHow many packets do you want to receive?: ");
+		scanf("%d",&amountOfPacketsToReceive);
+
+		clock_t begin = clock();
+		while (amountOfPacketsToReceive != 0)
+		{
+			number_of_bytes_received = recvfrom( internet_socket, buffer, ( sizeof buffer ) - 1, 0, (struct sockaddr *) &client_internet_address, &client_internet_address_length );
+			if( number_of_bytes_received == -1 )
+			{
+				perror( "recvfrom" );
+			}
+			else
+			{
+				numberOfPacketsReceived++;
+				buffer[number_of_bytes_received] = '\0';
+				printf( "Packet [ %d ]: %s\n",amountOfPacketsToReceive, buffer);
+				fprintf(OUTPUTFILE,"Packet [ %d ]: %s\n",amountOfPacketsToReceive, buffer);
+			}
+
+			int number_of_bytes_send = 0;
+			number_of_bytes_send = sendto( internet_socket, "PACKET RECEIVED", 16, 0, (struct sockaddr *) &client_internet_address, client_internet_address_length );
+			if( number_of_bytes_send == -1 )
+			{
+				perror( "sendto" );
+			}
+
+			amountOfPacketsToReceive--;
+		}
+
+		clock_t end = clock();
+    	double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+
+    	printf("\n\nTime between first and last packet: %f seconds.",time_spent);
 	}
+	
+
 }
 
 void cleanup( int internet_socket )
