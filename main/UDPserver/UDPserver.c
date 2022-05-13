@@ -134,6 +134,11 @@ void execution( int internet_socket )
 	{	
 		while(1)
 		{
+			int timeout = 10000;
+   			if (setsockopt(internet_socket, SOL_SOCKET, SO_RCVTIMEO,&timeout,sizeof(timeout)) < 0) 
+			{
+        	perror("Error");
+    		}
 			number_of_bytes_received = recvfrom( internet_socket, buffer, ( sizeof buffer ) - 1, 0, (struct sockaddr *) &client_internet_address, &client_internet_address_length );
 			if( number_of_bytes_received == -1 )
 			{
@@ -193,6 +198,14 @@ void execution( int internet_socket )
     	double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
 
     	printf("\n\nTime between first and last packet: %f seconds.",time_spent);
+	}
+
+	else
+	{
+		printf("\n\n\n-----------------------------------------\n");
+		printf("ERROR: please choose either 1 or 2.\n");
+		printf("Restart the program.\n");
+		return 0;
 	}
 	
 
