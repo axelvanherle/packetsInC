@@ -3,13 +3,13 @@
 ### Opdracht:
 Je maakt een 4 applicaties (UDP Client, UDP Server, TCP Client en TCP Server) die via Berkley sockets in C met elkaar over internet kunnen communiceren. De 2 Server applicaties en de 2 Client applicaties mogen op je laptop draaien.
 
-##### UDP Smartphone sensor stream analyzer (15%) [App]
+#### UDP Smartphone sensor stream analyzer (15%) [App]
 
- Welke onderdelen zijn behaald van de UDP Client ?
+##### Welke onderdelen zijn behaald van de UDP Client ?
  
  - [X] Werkende Client applicatie die aantal te sturen packetten via UDP stuurt (bewijs Packet Sender) [2/15]
  
- Welke onderdelen zijn behaald van de UDP Server ?
+##### Welke onderdelen zijn behaald van de UDP Server ?
  
  - [X] Werkende Server applicatie die gegevens via UDP ontvangt (bewijs Packet Sender) [2/15]
  
@@ -29,9 +29,9 @@ Je maakt een 4 applicaties (UDP Client, UDP Server, TCP Client en TCP Server) di
  
  - [ ] *Statistische gegevens worden in een bestand bewaard [1/15]
  
-##### TCP Chatbox met geschiedenis via HTTP (25%)
+#### TCP Chatbox met geschiedenis via HTTP (25%)
 
- Welke onderdelen zijn behaald van de TCP Client ?
+##### Welke onderdelen zijn behaald van de TCP Client ?
  
  - [ ] Client kan TCP connectie maken (bewijs via WireShark) [1/25]
  
@@ -41,7 +41,7 @@ Je maakt een 4 applicaties (UDP Client, UDP Server, TCP Client en TCP Server) di
  
  - [ ] *Er kan tegelijk berichten gestuurd en ontvangen worden op de Client zonder afgesproken beurtrol (e.g. multi-threaded) [4/25]
  
- - [ ] Welke onderdelen zijn behaald van de TCP Server ?
+ ##### Welke onderdelen zijn behaald van de TCP Server ?
  
  - [ ] Server kan luisteren naar een poort voor inkomende TCP connecties [1/25]
  
