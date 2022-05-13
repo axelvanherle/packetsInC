@@ -46,24 +46,12 @@ void cleanup( int internet_socket );
 
 int main( int argc, char * argv[] )
 {
-	//////////////////
-	//Initialization//
-	//////////////////
 
 	OSInit();
 
 	int internet_socket = initialization();
 
-	/////////////
-	//Execution//
-	/////////////
-
 	execution( internet_socket );
-
-
-	////////////
-	//Clean up//
-	////////////
 
 	cleanup( internet_socket );
 
@@ -130,7 +118,9 @@ void execution( int internet_socket )
 {
 	FILE *OUTPUTFILE;
     OUTPUTFILE = fopen("receivedPackets.csv", "w+");
+
 	int userChoice = 0;
+
 	int number_of_bytes_received = 0;
 	char buffer[1000];
 	struct sockaddr_storage client_internet_address;
@@ -140,7 +130,7 @@ void execution( int internet_socket )
 	printf("\n\n--------------------------------------");
 	printf("\nServer started. Find your IPV4 IP above.\n");
 	printf("\nWhat do you want to do?\n");
-	printf("[ 1 ] - Receive unlimited packets.\n");
+	printf("[ 1 ] - Receive unlimited packets. (With no timeout on packets)\n");
 	printf("[ 2 ] - Set the amount of packets to receive.\n");
 	printf("Enter your choice: ");
 	scanf("%d",&userChoice);
@@ -148,13 +138,9 @@ void execution( int internet_socket )
 
 	if (userChoice == 1)
 	{	
+	printf("\nYou chose unlimited. Program will not stop unless you force it too with ctrl+c.\n");
 		while(1)
 		{
-			int timeout = 10000;
-   			if (setsockopt(internet_socket, SOL_SOCKET, SO_RCVTIMEO,&timeout,sizeof(timeout)) < 0) 
-			{
-        	perror("Error");
-    		}
 			number_of_bytes_received = recvfrom( internet_socket, buffer, ( sizeof buffer ) - 1, 0, (struct sockaddr *) &client_internet_address, &client_internet_address_length );
 			if( number_of_bytes_received == -1 )
 			{
@@ -180,11 +166,46 @@ void execution( int internet_socket )
 	else if (userChoice == 2)
 	{
 		int amountOfPacketsToReceive = 0;
+		int timeout = 10000;
+		int userChoiceTimeout = 0;
+
+		printf("\n\nDo you want to set a custom timeout? (Standard is 10 seconds.)\n");
+		printf("[ 1 ] - Yes, i want to set a custom timeout.\n");
+		printf("[ 2 ] - No, 10 seconds is fine.\n");
+		printf("Enter your choice: ");
+		scanf("%d",&userChoiceTimeout);
+
+
+		if (userChoiceTimeout == 1)
+		{
+			printf("\nEnter custom time in seconds: ");
+			scanf("%d",&timeout);
+			timeout = timeout *1000;
+		}
+		else if (userChoiceTimeout == 2)
+		{
+			//Do nothing
+		}
+		else
+		{
+			printf("\n\n\n-----------------------------------------\n");
+			printf("ERROR: please choose either 1 or 2.\n");
+			printf("Restart the program.\n");
+			exit(-1);
+		}
 
 		printf("\nHow many packets do you want to receive?: ");
 		scanf("%d",&amountOfPacketsToReceive);
+		
+		
+		if (setsockopt(internet_socket, SOL_SOCKET, SO_RCVTIMEO,&timeout,sizeof(timeout)) < 0) 
+		{
+			printf("TEST");
+       		perror("Error");
+    	}
 
 		clock_t begin = clock();
+
 		while (amountOfPacketsToReceive != 0)
 		{
 			number_of_bytes_received = recvfrom( internet_socket, buffer, ( sizeof buffer ) - 1, 0, (struct sockaddr *) &client_internet_address, &client_internet_address_length );
@@ -221,14 +242,11 @@ void execution( int internet_socket )
 		printf("\n\n\n-----------------------------------------\n");
 		printf("ERROR: please choose either 1 or 2.\n");
 		printf("Restart the program.\n");
-		return 0;
+		exit(-1);
 	}
-	
-
 }
 
 void cleanup( int internet_socket )
 {
-	//Step 3.1
 	close( internet_socket );
 }
