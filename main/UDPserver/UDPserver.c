@@ -21,7 +21,7 @@
 	{
 		WSACleanup();
 	}
-	#define perror(string) fprintf( stderr, string ": WSA errno = %d\n", WSAGetLastError() )
+	#define perror(string) fprintf(stderr, string ": WSA errno = %d\n", WSAGetLastError())
 #else
 	#include <sys/socket.h> //for sockaddr, socket, socket
 	#include <sys/types.h> //for size_t
@@ -62,7 +62,6 @@ int main( int argc, char * argv[] )
 
 int initialization()
 {
-	//Step 1.1
 	struct addrinfo internet_address_setup;
 	struct addrinfo * internet_address_result;
 	memset( &internet_address_setup, 0, sizeof internet_address_setup );
@@ -80,7 +79,6 @@ int initialization()
 	struct addrinfo * internet_address_result_iterator = internet_address_result;
 	while( internet_address_result_iterator != NULL )
 	{
-		//Step 1.2
 		internet_socket = socket( internet_address_result_iterator->ai_family, internet_address_result_iterator->ai_socktype, internet_address_result_iterator->ai_protocol );
 		if( internet_socket == -1 )
 		{
@@ -88,7 +86,6 @@ int initialization()
 		}
 		else
 		{
-			//Step 1.3
 			int bind_return = bind( internet_socket, internet_address_result_iterator->ai_addr, internet_address_result_iterator->ai_addrlen );
 			if( bind_return == -1 )
 			{
@@ -197,10 +194,8 @@ void execution( int internet_socket )
 		printf("\nHow many packets do you want to receive?: ");
 		scanf("%d",&amountOfPacketsToReceive);
 		
-		
-		if (setsockopt(internet_socket, SOL_SOCKET, SO_RCVTIMEO,&timeout,sizeof(timeout)) < 0) 
+		if (setsockopt(internet_socket, SOL_SOCKET, SO_RCVTIMEO,&timeout,sizeof(timeout)) < 0)
 		{
-			printf("TEST");
        		perror("Error");
     	}
 
