@@ -68,7 +68,7 @@ int initialization()
 	internet_address_setup.ai_family = AF_INET;
 	internet_address_setup.ai_socktype = SOCK_DGRAM;
 	internet_address_setup.ai_flags = AI_PASSIVE;
-	int getaddrinfo_return = getaddrinfo( NULL, "24042", &internet_address_setup, &internet_address_result );
+	int getaddrinfo_return = getaddrinfo( NULL, "20000", &internet_address_setup, &internet_address_result );
 	if( getaddrinfo_return != 0 )
 	{
 		fprintf( stderr, "getaddrinfo: %s\n", gai_strerror( getaddrinfo_return ) );
@@ -162,7 +162,11 @@ void execution( int internet_socket )
 
 	else if (userChoice == 2)
 	{
+		int packetLossCounterTimeout = 0;
+		int packetLossCounterTimeoutPrint = 0;
+		double packetLossCounterTimeoutPercentage = 0.0;
 		int amountOfPacketsToReceive = 0;
+		int amountOfPacketsToReceivePrint = 0;
 		int timeout = 10000;
 		int userChoiceTimeout = 0;
 
@@ -193,6 +197,7 @@ void execution( int internet_socket )
 
 		printf("\nHow many packets do you want to receive?: ");
 		scanf("%d",&amountOfPacketsToReceive);
+		amountOfPacketsToReceivePrint = amountOfPacketsToReceive;
 	
 		clock_t begin = clock();
 
@@ -207,6 +212,7 @@ void execution( int internet_socket )
 			if( number_of_bytes_received == -1 )
 			{
 				perror( "recvfrom" );
+				++packetLossCounterTimeout;
 			}
 			else
 			{
@@ -229,7 +235,13 @@ void execution( int internet_socket )
 		clock_t end = clock();
     	double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
 
-    	printf("\n\nTime between first and last packet: %f seconds.",time_spent);
+    	printf("\n\nTime between first and last packet: %f seconds.\n",time_spent);
+
+		packetLossCounterTimeoutPrint = packetLossCounterTimeout;
+		packetLossCounterTimeoutPrint = amountOfPacketsToReceivePrint - packetLossCounterTimeoutPrint;
+		packetLossCounterTimeoutPercentage = 100.0 * (amountOfPacketsToReceivePrint - packetLossCounterTimeoutPrint) / amountOfPacketsToReceivePrint;
+
+		printf("You expected %d packets, due to timeouts you only received %d packets. That is a %.2f%% loss.",amountOfPacketsToReceivePrint,packetLossCounterTimeoutPrint,packetLossCounterTimeoutPercentage);
 	}
 
 	else
