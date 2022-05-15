@@ -129,8 +129,6 @@ void execution( int internet_socket )
 	printf("What should the content of the packet be?\n");
     gets(contentPacketToSend);
 
-    printf("%s\n",contentPacketToSend);
-
 	//Adds NUL terminator to the end of the stings and gets the bytes for sendto function.
 	lenghtOfContentPacketToSend = strlen(contentPacketToSend);
 	contentPacketToSend[lenghtOfContentPacketToSend] = '\0';
@@ -145,7 +143,7 @@ void execution( int internet_socket )
 	//Step 2.2
 	int number_of_bytes_received = 0;
 	char buffer[1000];
-	number_of_bytes_received = recv( internet_socket, buffer, ( sizeof buffer ) - 1, 0 );
+	number_of_bytes_received = recv( internet_socket, buffer, ( sizeof buffer ) - 1, 0 ); //NOT BLOCKING??
 	if( number_of_bytes_received == -1 )
 	{
 		perror( "recv" );
@@ -155,6 +153,8 @@ void execution( int internet_socket )
 		buffer[number_of_bytes_received] = '\0';
 		printf( "Received : %s\n", buffer );
 	}
+
+	printf("\n---------------%s",buffer);
 }
 
 void cleanup( int internet_socket )

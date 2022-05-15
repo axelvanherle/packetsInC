@@ -12,7 +12,6 @@ int main()
 	char contentPacketToSend[180];
 
 	printf("What should the content of the packet be?\n");
-	//scanf("%s",&contentPacketToSend);
     gets(contentPacketToSend);
 
     printf("%s\n",contentPacketToSend);
