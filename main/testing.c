@@ -8,11 +8,18 @@
 
 int main()
 {
-    clock_t begin = clock();
+	int lenghtOfContentPacketToSend;
+	char contentPacketToSend[180];
 
-    system("pause");
+	printf("What should the content of the packet be?\n");
+	//scanf("%s",&contentPacketToSend);
+    gets(contentPacketToSend);
 
-    clock_t end = clock();
-    double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
-    printf("%f",time_spent);
+    printf("%s\n",contentPacketToSend);
+
+	//Adds NUL terminator to the end of the stings and gets the bytes for sendto function.
+	lenghtOfContentPacketToSend = strlen(contentPacketToSend);
+	contentPacketToSend[lenghtOfContentPacketToSend] = '\0';
+	
+	printf("\n%s %d\n",contentPacketToSend, lenghtOfContentPacketToSend);
 }
