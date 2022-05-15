@@ -196,6 +196,11 @@ void execution( int internet_socket )
 	
 		clock_t begin = clock();
 
+    	if (setsockopt(internet_socket, SOL_SOCKET, SO_RCVTIMEO,&timeout,sizeof(timeout)) < 0) 
+		{
+        perror("Error");
+    	}
+
 		while (amountOfPacketsToReceive != 0)
 		{
 			number_of_bytes_received = recvfrom( internet_socket, buffer, ( sizeof buffer ) - 1, 0, (struct sockaddr *) &client_internet_address, &client_internet_address_length );
