@@ -63,4 +63,3 @@ Je maakt een 4 applicaties (UDP Client, UDP Server, TCP Client en TCP Server) di
  
  - [ ] *Er kunnen meerdere Clients simultaan verbonden zijn en chatten met elkaar (i.e. assynchroon of synchroon verwerkt op de server) [4/25]
  
-- [ ] * zijn uitbreidingsvragen, vergen meer zelfstandig opzoekwerk en doorzetting om werkend te krijgen
