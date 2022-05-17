@@ -37,11 +37,15 @@
 #endif
 
 int initialization();
+int connection( int internet_socket );
 void execution( int internet_socket );
-void cleanup( int internet_socket );
+void cleanup( int internet_socket, int client_internet_socket );
 
 int main( int argc, char * argv[] )
 {
+    while (1)
+    {
+    
 	//////////////////
 	//Initialization//
 	//////////////////
@@ -50,20 +54,27 @@ int main( int argc, char * argv[] )
 
 	int internet_socket = initialization();
 
+	//////////////
+	//Connection//
+	//////////////
+
+	int client_internet_socket = connection( internet_socket );
+
 	/////////////
 	//Execution//
 	/////////////
 
-	execution( internet_socket );
+	execution( client_internet_socket );
 
 
 	////////////
 	//Clean up//
 	////////////
 
-	cleanup( internet_socket );
+	cleanup( internet_socket, client_internet_socket );
 
 	OSCleanup();
+    }
 
 	return 0;
 }
@@ -76,7 +87,8 @@ int initialization()
 	memset( &internet_address_setup, 0, sizeof internet_address_setup );
 	internet_address_setup.ai_family = AF_INET;
 	internet_address_setup.ai_socktype = SOCK_STREAM;
-	int getaddrinfo_return = getaddrinfo( "127.0.0.1", "24042", &internet_address_setup, &internet_address_result );
+	internet_address_setup.ai_flags = AI_PASSIVE;
+	int getaddrinfo_return = getaddrinfo( NULL, "24042", &internet_address_setup, &internet_address_result );
 	if( getaddrinfo_return != 0 )
 	{
 		fprintf( stderr, "getaddrinfo: %s\n", gai_strerror( getaddrinfo_return ) );
@@ -96,15 +108,25 @@ int initialization()
 		else
 		{
 			//Step 1.3
-			int connect_return = connect( internet_socket, internet_address_result_iterator->ai_addr, internet_address_result_iterator->ai_addrlen );
-			if( connect_return == -1 )
+			int bind_return = bind( internet_socket, internet_address_result_iterator->ai_addr, internet_address_result_iterator->ai_addrlen );
+			if( bind_return == -1 )
 			{
-				perror( "connect" );
+				perror( "bind" );
 				close( internet_socket );
 			}
 			else
 			{
-				break;
+				//Step 1.4
+				int listen_return = listen( internet_socket, 1 );
+				if( listen_return == -1 )
+				{
+					close( internet_socket );
+					perror( "listen" );
+				}
+				else
+				{
+					break;
+				}
 			}
 		}
 		internet_address_result_iterator = internet_address_result_iterator->ai_next;
@@ -121,29 +143,27 @@ int initialization()
 	return internet_socket;
 }
 
-void execution( int internet_socket )
-{	
-    int lenghtOfContentPacketToSend;
-	char contentPacketToSend[180];
-
-	printf("What should the content of the packet be?\n");
-    gets(contentPacketToSend);
-
-	//Adds NUL terminator to the end of the stings and gets the bytes for sendto function.
-	lenghtOfContentPacketToSend = strlen(contentPacketToSend);
-	contentPacketToSend[lenghtOfContentPacketToSend] = '\0';
-
-	int number_of_bytes_send = 0;
-	number_of_bytes_send = send( internet_socket, contentPacketToSend, lenghtOfContentPacketToSend, 0 );
-	if( number_of_bytes_send == -1 )
+int connection( int internet_socket )
+{
+	//Step 2.1
+	struct sockaddr_storage client_internet_address;
+	socklen_t client_internet_address_length = sizeof client_internet_address;
+	int client_socket = accept( internet_socket, (struct sockaddr *) &client_internet_address, &client_internet_address_length );
+	if( client_socket == -1 )
 	{
-		perror( "send" );
+		perror( "accept" );
+		close( internet_socket );
+		exit( 3 );
 	}
+	return client_socket;
+}
 
-	//Step 2.2
+void execution( int internet_socket )
+{
+	//Step 3.1
 	int number_of_bytes_received = 0;
 	char buffer[1000];
-	number_of_bytes_received = recv( internet_socket, buffer, ( sizeof buffer ) - 1, 0 ); //NOT BLOCKING??
+	number_of_bytes_received = recv( internet_socket, buffer, ( sizeof buffer ) - 1, 0 );
 	if( number_of_bytes_received == -1 )
 	{
 		perror( "recv" );
@@ -153,17 +173,26 @@ void execution( int internet_socket )
 		buffer[number_of_bytes_received] = '\0';
 		printf( "Received : %s\n", buffer );
 	}
+
+	//Step 3.2
+	int number_of_bytes_send = 0;
+	number_of_bytes_send = send( internet_socket, "Hello TCP world!", 16, 0 );
+	if( number_of_bytes_send == -1 )
+	{
+		perror( "send" );
+	}
 }
 
-void cleanup( int internet_socket )
+void cleanup( int internet_socket, int client_internet_socket )
 {
-	//Step 3.2
-	int shutdown_return = shutdown( internet_socket, SD_SEND );
+	//Step 4.2
+	int shutdown_return = shutdown( client_internet_socket, SD_RECEIVE );
 	if( shutdown_return == -1 )
 	{
 		perror( "shutdown" );
 	}
 
-	//Step 3.1
+	//Step 4.1
+	close( client_internet_socket );
 	close( internet_socket );
 }
