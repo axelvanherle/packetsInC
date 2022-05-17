@@ -43,38 +43,24 @@ void cleanup( int internet_socket, int client_internet_socket );
 
 int main( int argc, char * argv[] )
 {
-    while (1)
-    {
     
-	//////////////////
-	//Initialization//
-	//////////////////
-
 	OSInit();
 
 	int internet_socket = initialization();
 
-	//////////////
-	//Connection//
-	//////////////
-
 	int client_internet_socket = connection( internet_socket );
 
-	/////////////
-	//Execution//
-	/////////////
-
+    while (1)
+    {
+    
 	execution( client_internet_socket );
+    }
 
-
-	////////////
-	//Clean up//
-	////////////
 
 	cleanup( internet_socket, client_internet_socket );
 
 	OSCleanup();
-    }
+    
 
 	return 0;
 }
@@ -159,7 +145,8 @@ int connection( int internet_socket )
 }
 
 void execution( int internet_socket )
-{
+{   
+    printf("CLIENT SOCKET: %d\n",internet_socket);
 	//Step 3.1
 	int number_of_bytes_received = 0;
 	char buffer[1000];
