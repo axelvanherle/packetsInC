@@ -1,5 +1,7 @@
 # packetsInC
 
+![udptcp](https://user-images.githubusercontent.com/94362354/168884092-4e8151e9-5413-4cc0-aa1b-f526f54781b5.png)
+
 ### Opdracht:
 Je maakt een 4 applicaties (UDP Client, UDP Server, TCP Client en TCP Server) die via Berkley sockets in C met elkaar over internet kunnen communiceren. De 2 Server applicaties en de 2 Client applicaties mogen op je laptop draaien.
 
@@ -43,9 +45,9 @@ Je maakt een 4 applicaties (UDP Client, UDP Server, TCP Client en TCP Server) di
  
  ##### Welke onderdelen zijn behaald van de TCP Server ?
  
- - [ ] Server kan luisteren naar een poort voor inkomende TCP connecties [1/25]
+ - [X] Server kan luisteren naar een poort voor inkomende TCP connecties [1/25]
  
-- [ ]  Server accepteert verbinding en praat met verbonden client over TCP [1/25]
+- [X]  Server accepteert verbinding en praat met verbonden client over TCP [1/25]
  
 - [ ]  Server applicatie stuurt ontvangen bericht door naar alle andere deelnemers [1/25]
  
