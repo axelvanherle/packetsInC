@@ -45,9 +45,9 @@ Je maakt een 4 applicaties (UDP Client, UDP Server, TCP Client en TCP Server) di
  
  ##### Welke onderdelen zijn behaald van de TCP Server ?
  
- - [ ] Server kan luisteren naar een poort voor inkomende TCP connecties [1/25]
+ - [X] Server kan luisteren naar een poort voor inkomende TCP connecties [1/25]
  
-- [ ]  Server accepteert verbinding en praat met verbonden client over TCP [1/25]
+- [X]  Server accepteert verbinding en praat met verbonden client over TCP [1/25]
  
 - [ ]  Server applicatie stuurt ontvangen bericht door naar alle andere deelnemers [1/25]
  
