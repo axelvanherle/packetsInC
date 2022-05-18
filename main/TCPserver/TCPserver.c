@@ -140,14 +140,27 @@ int main(void)
 
                     } else {
                         // We got some good data from a client
+                        char tempStorage [1050];
+                        memset(tempStorage, '\0', sizeof(tempStorage));
+                        strcpy(tempStorage,"TEST\n");
+
 
                         for(int j = 0; j < fd_count; j++) {
+
+                            nbytes = strlen(buf);
+                            int nbytesTemp = strlen(tempStorage);
+
                             // Send to everyone!
                             int dest_fd = pfds[j].fd;
 
                             // Except the listener and ourselves
                             if (dest_fd != listener && dest_fd != sender_fd) {
-                                if (send(dest_fd, buf, nbytes, 0) == -1) {
+                                if (send(dest_fd, buf, nbytes, 0) == -1) 
+                                {
+                                    perror("send");
+                                }
+                                if (send(dest_fd, tempStorage, nbytesTemp, 0) == -1) 
+                                {
                                     perror("send");
                                 }
                             }
