@@ -36,6 +36,8 @@
 	void OSCleanup( void ) {}
 #endif
 
+int TEST = 0;
+
 int initialization();
 int connection( int internet_socket );
 void execution( int internet_socket );
@@ -48,17 +50,14 @@ int main( int argc, char * argv[] )
 
 	int internet_socket = initialization();
 
+	for(;;)
+	{
 	int client_internet_socket = connection( internet_socket );
 
-    while (1)
-    {
-    
 	execution( client_internet_socket );
-    }
-
 
 	cleanup( internet_socket, client_internet_socket );
-
+	}
 	OSCleanup();
     
 
@@ -146,7 +145,8 @@ int connection( int internet_socket )
 
 void execution( int internet_socket )
 {   
-    printf("CLIENT SOCKET: %d\n",internet_socket);
+	TEST = internet_socket;
+    printf("CLIENT SOCKET: %d\n",TEST);
 	//Step 3.1
 	int number_of_bytes_received = 0;
 	char buffer[1000];
