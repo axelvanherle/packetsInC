@@ -42,24 +42,11 @@ void cleanup( int internet_socket );
 
 int main( int argc, char * argv[] )
 {
-	//////////////////
-	//Initialization//
-	//////////////////
-
 	OSInit();
 
 	int internet_socket = initialization();
 
-	/////////////
-	//Execution//
-	/////////////
-
 	execution( internet_socket );
-
-
-	////////////
-	//Clean up//
-	////////////
 
 	cleanup( internet_socket );
 
@@ -70,13 +57,12 @@ int main( int argc, char * argv[] )
 
 int initialization()
 {
-	//Step 1.1
 	struct addrinfo internet_address_setup;
 	struct addrinfo * internet_address_result;
 	memset( &internet_address_setup, 0, sizeof internet_address_setup );
 	internet_address_setup.ai_family = AF_INET;
 	internet_address_setup.ai_socktype = SOCK_STREAM;
-	int getaddrinfo_return = getaddrinfo( "student.pxl-ea-ict.be", "80", &internet_address_setup, &internet_address_result );
+	int getaddrinfo_return = getaddrinfo( "127.0.0.1", "24042", &internet_address_setup, &internet_address_result );
 	if( getaddrinfo_return != 0 )
 	{
 		fprintf( stderr, "getaddrinfo: %s\n", gai_strerror( getaddrinfo_return ) );
@@ -87,7 +73,6 @@ int initialization()
 	struct addrinfo * internet_address_result_iterator = internet_address_result;
 	while( internet_address_result_iterator != NULL )
 	{
-		//Step 1.2
 		internet_socket = socket( internet_address_result_iterator->ai_family, internet_address_result_iterator->ai_socktype, internet_address_result_iterator->ai_protocol );
 		if( internet_socket == -1 )
 		{
@@ -95,7 +80,6 @@ int initialization()
 		}
 		else
 		{
-			//Step 1.3
 			int connect_return = connect( internet_socket, internet_address_result_iterator->ai_addr, internet_address_result_iterator->ai_addrlen );
 			if( connect_return == -1 )
 			{
@@ -124,12 +108,11 @@ int initialization()
 void execution( int internet_socket )
 {	
     int lenghtOfContentPacketToSend;
-	char contentPacketToSend[180] = "GET /history.php?i=12345678 HTTP/1.0\r\nHost: student.pxl-ea-ict.be\r\n\r\n"; 
+	char contentPacketToSend[180]; 
 
 	printf("What should the content of the packet be?\n");
     
-	
-	//gets(contentPacketToSend);
+	gets(contentPacketToSend);
 
 	//Adds NUL terminator to the end of the stings and gets the bytes for sendto function.
 	lenghtOfContentPacketToSend = strlen(contentPacketToSend);
@@ -142,9 +125,6 @@ void execution( int internet_socket )
 		perror( "send" );
 	}
 
-	//Step 2.2
-	for(;;)
-	{
 	int number_of_bytes_received = 0;
 	char buffer[10000];
 	number_of_bytes_received = recv( internet_socket, buffer, ( sizeof buffer ) - 1, 0 ); //NOT BLOCKING??
@@ -156,7 +136,6 @@ void execution( int internet_socket )
 	{
 		buffer[number_of_bytes_received] = '\0';
 		printf( "Received : %s\n", buffer );
-	}
 	}
 }
 
