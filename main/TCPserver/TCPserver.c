@@ -139,7 +139,8 @@ int connection( int internet_socket )
 		perror( "accept" );
 		close( internet_socket );
 		exit( 3 );
-	}
+	}	
+
 	return client_socket;
 }
 
