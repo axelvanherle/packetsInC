@@ -140,16 +140,11 @@ int main(void)
 
                     } else {
                         // We got some good data from a client
-                        //char tempStorage [1050];
-                        //memset(tempStorage, '\0', sizeof(tempStorage));
-
+  
                         for(int j = 0; j < fd_count; j++) {
                             if (j == 0)
                             {    
-                                printf("Received a message from %s on port %d.\n",inet_ntop(remoteaddr.ss_family,
-                                get_in_addr((struct sockaddr*)&remoteaddr),
-                                remoteIP, INET6_ADDRSTRLEN),
-                                newfd);
+                                printf("Received a message\n");
                             }
 
                             // Send to everyone!
