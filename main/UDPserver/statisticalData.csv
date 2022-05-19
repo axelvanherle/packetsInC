@@ -1,0 +1,7 @@
+User chose a set amount of packets to receive.
+User chose a custom timeout of 1 seconds.
+User chose to receive 2 packets.
+
+
+Time between first and last packet: 2.033000 seconds.
+You expected 2 packets, due to timeouts you only received 0 packets. That is a 100.00% loss.

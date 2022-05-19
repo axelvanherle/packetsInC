@@ -140,15 +140,17 @@ int main(void)
 
                     } else {
                         // We got some good data from a client
-                        char tempStorage [1050];
-                        memset(tempStorage, '\0', sizeof(tempStorage));
-                        strcpy(tempStorage,"TEST\n");
-
+                        //char tempStorage [1050];
+                        //memset(tempStorage, '\0', sizeof(tempStorage));
 
                         for(int j = 0; j < fd_count; j++) {
-
-                            nbytes = strlen(buf);
-                            int nbytesTemp = strlen(tempStorage);
+                            if (j == 0)
+                            {    
+                                printf("Received a message from %s on port %d.\n",inet_ntop(remoteaddr.ss_family,
+                                get_in_addr((struct sockaddr*)&remoteaddr),
+                                remoteIP, INET6_ADDRSTRLEN),
+                                newfd);
+                            }
 
                             // Send to everyone!
                             int dest_fd = pfds[j].fd;
@@ -156,11 +158,8 @@ int main(void)
                             // Except the listener and ourselves
                             if (dest_fd != listener && dest_fd != sender_fd) {
                                 if (send(dest_fd, buf, nbytes, 0) == -1) 
-                                {
-                                    perror("send");
-                                }
-                                if (send(dest_fd, tempStorage, nbytesTemp, 0) == -1) 
-                                {
+                                {   
+                                    printf("TEST, %s\n",buf);
                                     perror("send");
                                 }
                             }

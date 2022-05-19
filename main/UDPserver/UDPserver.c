@@ -115,6 +115,8 @@ void execution( int internet_socket )
 {
 	FILE *OUTPUTFILE;
     OUTPUTFILE = fopen("receivedPackets.csv", "w+");
+	FILE *OUTPUTFILESTATS;
+    OUTPUTFILESTATS = fopen("statisticalData.csv", "w+");
 
 	int userChoice = 0;
 
@@ -135,6 +137,7 @@ void execution( int internet_socket )
 
 	if (userChoice == 1)
 	{	
+	fprintf(OUTPUTFILESTATS,"User chose unlimited packets.\n");
 	printf("\nYou chose unlimited. Program will not stop unless you force it too with ctrl+c.\n");
 		while(1)
 		{
@@ -169,6 +172,7 @@ void execution( int internet_socket )
 		int amountOfPacketsToReceivePrint = 0;
 		int timeout = 10000;
 		int userChoiceTimeout = 0;
+		fprintf(OUTPUTFILESTATS,"User chose a set amount of packets to receive.\n");
 
 		printf("\n\nDo you want to set a custom timeout? (Standard is 10 seconds.)\n");
 		printf("[ 1 ] - Yes, i want to set a custom timeout.\n");
@@ -181,14 +185,17 @@ void execution( int internet_socket )
 		{
 			printf("\nEnter custom time in seconds: ");
 			scanf("%d",&timeout);
+			fprintf(OUTPUTFILESTATS,"User chose a custom timeout of %d seconds.\n",timeout);
 			timeout = timeout *1000;
 		}
 		else if (userChoiceTimeout == 2)
-		{
+		{	
+			fprintf(OUTPUTFILESTATS,"User chose the standard timeout of 10 seconds.\n",timeout);
 			//Do nothing
 		}
 		else
 		{
+			fprintf(OUTPUTFILESTATS,"User chose a wrong option in timeout selection. Stopping now.\n");
 			printf("\n\n\n-----------------------------------------\n");
 			printf("ERROR: please choose either 1 or 2.\n");
 			printf("Restart the program.\n");
@@ -197,6 +204,7 @@ void execution( int internet_socket )
 
 		printf("\nHow many packets do you want to receive?: ");
 		scanf("%d",&amountOfPacketsToReceive);
+		fprintf(OUTPUTFILESTATS,"User chose to receive %d packets.\n",amountOfPacketsToReceive);
 		amountOfPacketsToReceivePrint = amountOfPacketsToReceive;
 	
 		clock_t begin = clock();
@@ -236,16 +244,19 @@ void execution( int internet_socket )
     	double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
 
     	printf("\n\nTime between first and last packet: %f seconds.\n",time_spent);
+		fprintf(OUTPUTFILESTATS,"\n\nTime between first and last packet: %f seconds.\n",time_spent);
 
 		packetLossCounterTimeoutPrint = packetLossCounterTimeout;
 		packetLossCounterTimeoutPrint = amountOfPacketsToReceivePrint - packetLossCounterTimeoutPrint;
 		packetLossCounterTimeoutPercentage = 100.0 * (amountOfPacketsToReceivePrint - packetLossCounterTimeoutPrint) / amountOfPacketsToReceivePrint;
 
 		printf("You expected %d packets, due to timeouts you only received %d packets. That is a %.2f%% loss.",amountOfPacketsToReceivePrint,packetLossCounterTimeoutPrint,packetLossCounterTimeoutPercentage);
+		fprintf(OUTPUTFILESTATS,"You expected %d packets, due to timeouts you only received %d packets. That is a %.2f%% loss.",amountOfPacketsToReceivePrint,packetLossCounterTimeoutPrint,packetLossCounterTimeoutPercentage,time_spent);
 	}
 
 	else
 	{
+		fprintf(OUTPUTFILESTATS,"User chose a wrong option in option selection. Stopping now.\n");
 		printf("\n\n\n-----------------------------------------\n");
 		printf("ERROR: please choose either 1 or 2.\n");
 		printf("Restart the program.\n");

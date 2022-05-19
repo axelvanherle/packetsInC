@@ -35,10 +35,9 @@
 	void OSInit( void ) {}
 	void OSCleanup( void ) {}
 #endif
+#define PORT "9034"   // port we're listening on
 
-#define PORT "9034"   // Port we're listening on
-
-// Get sockaddr, IPv4 or IPv6:
+// get sockaddr, IPv4 or IPv6:
 void *get_in_addr(struct sockaddr *sa)
 {
     if (sa->sa_family == AF_INET) {
@@ -48,16 +47,32 @@ void *get_in_addr(struct sockaddr *sa)
     return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
 
-// Return a listening socket
-int get_listener_socket(void)
+int main(void)
 {
-    int listener;     // Listening socket descriptor
-    int yes=1;        // For setsockopt() SO_REUSEADDR, below
-    int rv;
+    OSInit;
+    fd_set master;    // master file descriptor list
+    fd_set read_fds;  // temp file descriptor list for select()
+    int fdmax;        // maximum file descriptor number
+
+    int listener;     // listening socket descriptor
+    int newfd;        // newly accept()ed socket descriptor
+    struct sockaddr_storage remoteaddr; // client address
+    socklen_t addrlen;
+
+    char buf[256];    // buffer for client data
+    int nbytes;
+
+    char remoteIP[INET6_ADDRSTRLEN];
+
+    int yes=1;        // for setsockopt() SO_REUSEADDR, below
+    int i, j, rv;
 
     struct addrinfo hints, *ai, *p;
 
-    // Get us a socket and bind it
+    FD_ZERO(&master);    // clear the master and temp sets
+    FD_ZERO(&read_fds);
+
+    // get us a socket and bind it
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
@@ -73,7 +88,7 @@ int get_listener_socket(void)
             continue;
         }
         
-        // Lose the pesky "address already in use" error message
+        // lose the pesky "address already in use" error message
         setsockopt(listener, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
 
         if (bind(listener, p->ai_addr, p->ai_addrlen) < 0) {
@@ -84,98 +99,39 @@ int get_listener_socket(void)
         break;
     }
 
-    freeaddrinfo(ai); // All done with this
-
-    // If we got here, it means we didn't get bound
+    // if we got here, it means we didn't get bound
     if (p == NULL) {
-        return -1;
+        fprintf(stderr, "selectserver: failed to bind\n");
+        exit(2);
     }
 
-    // Listen
+    freeaddrinfo(ai); // all done with this
+
+    // listen
     if (listen(listener, 10) == -1) {
-        return -1;
+        perror("listen");
+        exit(3);
     }
 
-    return listener;
-}
+    // add the listener to the master set
+    FD_SET(listener, &master);
 
-// Add a new file descriptor to the set
-void add_to_pfds(struct pollfd *pfds[], int newfd, int *fd_count, int *fd_size)
-{
-    // If we don't have room, add more space in the pfds array
-    if (*fd_count == *fd_size) {
-        *fd_size *= 2; // Double it
+    // keep track of the biggest file descriptor
+    fdmax = listener; // so far, it's this one
 
-        *pfds = realloc(*pfds, sizeof(**pfds) * (*fd_size));
-    }
-
-    (*pfds)[*fd_count].fd = newfd;
-    (*pfds)[*fd_count].events = POLLIN; // Check ready-to-read
-
-    (*fd_count)++;
-}
-
-// Remove an index from the set
-void del_from_pfds(struct pollfd pfds[], int i, int *fd_count)
-{
-    // Copy the one from the end over this one
-    pfds[i] = pfds[*fd_count-1];
-
-    (*fd_count)--;
-}
-
-// Main
-int main(void)
-{
-	OSInit();
-    int listener;     // Listening socket descriptor
-
-    int newfd;        // Newly accept()ed socket descriptor
-    struct sockaddr_storage remoteaddr; // Client address
-    socklen_t addrlen;
-
-    char buf[256];    // Buffer for client data
-
-    char remoteIP[INET6_ADDRSTRLEN];
-
-    // Start off with room for 5 connections
-    // (We'll realloc as necessary)
-    int fd_count = 0;
-    int fd_size = 5;
-    struct pollfd *pfds = malloc(sizeof *pfds * fd_size);
-
-    // Set up and get a listening socket
-    listener = get_listener_socket();
-
-    if (listener == -1) {
-        fprintf(stderr, "error getting listening socket\n");
-        exit(1);
-    }
-
-    // Add the listener to set
-    pfds[0].fd = listener;
-    pfds[0].events = POLLIN; // Report ready to read on incoming connection
-
-    fd_count = 1; // For the listener
-
-    // Main loop
+    // main loop
     for(;;) {
-        int poll_count = WSAPoll(pfds, fd_count, -1);
-
-        if (poll_count == -1) {
-            perror("poll");
-            exit(1);
+        read_fds = master; // copy it
+        if (select(fdmax+1, &read_fds, NULL, NULL, NULL) == -1) {
+            perror("select");
+            exit(4);
         }
 
-        // Run through the existing connections looking for data to read
-        for(int i = 0; i < fd_count; i++) {
-
-            // Check if someone's ready to read
-            if (pfds[i].revents & POLLIN) { // We got one!!
-
-                if (pfds[i].fd == listener) {
-                    // If listener is ready to read, handle new connection
-
+        // run through the existing connections looking for data to read
+        for(i = 0; i <= fdmax; i++) {
+            if (FD_ISSET(i, &read_fds)) { // we got one!!
+                if (i == listener) {
+                    // handle new connections
                     addrlen = sizeof remoteaddr;
                     newfd = accept(listener,
                         (struct sockaddr *)&remoteaddr,
@@ -184,9 +140,11 @@ int main(void)
                     if (newfd == -1) {
                         perror("accept");
                     } else {
-                        add_to_pfds(&pfds, newfd, &fd_count, &fd_size);
-
-                        printf("pollserver: new connection from %s on "
+                        FD_SET(newfd, &master); // add to master set
+                        if (newfd > fdmax) {    // keep track of the max
+                            fdmax = newfd;
+                        }
+                        printf("selectserver: new connection from %s on "
                             "socket %d\n",
                             inet_ntop(remoteaddr.ss_family,
                                 get_in_addr((struct sockaddr*)&remoteaddr),
@@ -194,44 +152,36 @@ int main(void)
                             newfd);
                     }
                 } else {
-                    // If not the listener, we're just a regular client
-                    int nbytes = recv(pfds[i].fd, buf, sizeof buf, 0);
-
-                    int sender_fd = pfds[i].fd;
-
-                    if (nbytes <= 0) {
-                        // Got error or connection closed by client
+                    // handle data from a client
+                    if ((nbytes = recv(i, buf, sizeof buf, 0)) <= 0) {
+                        // got error or connection closed by client
                         if (nbytes == 0) {
-                            // Connection closed
-                            printf("pollserver: socket %d hung up\n", sender_fd);
+                            // connection closed
+                            printf("selectserver: socket %d hung up\n", i);
                         } else {
                             perror("recv");
                         }
-
-                        close(pfds[i].fd); // Bye!
-
-                        del_from_pfds(pfds, i, &fd_count);
-
+                        close(i); // bye!
+                        FD_CLR(i, &master); // remove from master set
                     } else {
-                        // We got some good data from a client
-
-                        for(int j = 0; j < fd_count; j++) {
-                            // Send to everyone!
-                            int dest_fd = pfds[j].fd;
-
-                            // Except the listener and ourselves
-                            if (dest_fd != listener && dest_fd != sender_fd) {
-                                if (send(dest_fd, buf, nbytes, 0) == -1) {
-                                    perror("send");
+                        // we got some data from a client
+                        for(j = 0; j <= fdmax; j++) {
+                            // send to everyone!
+                            if (FD_ISSET(j, &master)) {
+                                // except the listener and ourselves
+                                if (j != listener && j != i) {
+                                    if (send(j, buf, nbytes, 0) == -1) {
+                                        perror("send");
+                                    }
                                 }
                             }
                         }
                     }
                 } // END handle data from client
-            } // END got ready-to-read from poll()
+            } // END got new incoming connection
         } // END looping through file descriptors
     } // END for(;;)--and you thought it would never end!
     
-	OSCleanup();
+    OSCleanup( void );
     return 0;
 }
