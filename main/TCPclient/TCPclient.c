@@ -127,7 +127,7 @@ void execution( int internet_socket )
 
 	int number_of_bytes_received = 0;
 	char buffer[10000];
-	number_of_bytes_received = recv( internet_socket, buffer, ( sizeof buffer ) - 1, 0 ); //NOT BLOCKING??
+	number_of_bytes_received = recv( internet_socket, buffer, ( sizeof buffer ) - 1, 0 );
 	if( number_of_bytes_received == -1 )
 	{
 		perror( "recv" );

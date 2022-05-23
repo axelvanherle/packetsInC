@@ -1,7 +1,3 @@
-/*
-** selectserver.c -- a cheezy multiperson chat server
-*/
-
 #ifdef _WIN32
 	#define _WIN32_WINNT _WIN32_WINNT_WIN7
 	#include <winsock2.h> //for all socket programming
@@ -60,7 +56,6 @@ int main(void)
     fd_set master;    // master file descriptor list
     fd_set read_fds;  // temp file descriptor list for select()
     int fdmax;        // maximum file descriptor number
-
     int listener;     // listening socket descriptor
     int newfd;        // newly accept()ed socket descriptor
     struct sockaddr_storage remoteaddr; // client address
@@ -160,6 +155,32 @@ int main(void)
 							fdmax = newfd;
                         }
                         printf("selectserver: new connection from %s on ""socket %d\n",inet_ntop(remoteaddr.ss_family,get_in_addr((struct sockaddr*)&remoteaddr),remoteIP, INET6_ADDRSTRLEN),newfd);
+
+                        char newConMsg[256];
+                        sprintf(newConMsg,"new connection from ");
+                        strcat(newConMsg, inet_ntop(remoteaddr.ss_family,get_in_addr((struct sockaddr*)&remoteaddr),remoteIP, INET6_ADDRSTRLEN));
+                        strcat(newConMsg," on socket ");
+                        char newfdString[4];
+                        itoa(newfd,newfdString,10);
+                        strcat(newConMsg, newfdString);
+                        newConMsg[strlen(newConMsg)+1] = '\r';
+
+                        for(j = 0; j <= fdmax; j++) 
+						{  
+                            // send to everyone!
+                            if (FD_ISSET(j, &master)) 
+							{   
+                                // except the listener and ourselves
+                                if (j != listener && j != i) 
+								{
+                                    if (send(j, newConMsg, (strlen(newConMsg)), 0) == -1) 
+									{	
+                                        perror("send");
+                                    }
+                                }
+                                
+                            }
+                        }
                     }
                 }
 				else 
@@ -183,19 +204,19 @@ int main(void)
 					{
                         // we got some data from a client
                         for(j = 0; j <= fdmax; j++) 
-						{
+						{  
                             // send to everyone!
                             if (FD_ISSET(j, &master)) 
-							{
+							{   
                                 // except the listener and ourselves
                                 if (j != listener && j != i) 
 								{
-									printf("%s",p->ai_addr);
                                     if (send(j, buf, nbytes, 0) == -1) 
 									{	
                                         perror("send");
                                     }
                                 }
+                                
                             }
                         }
                     }
