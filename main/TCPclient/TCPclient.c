@@ -62,7 +62,7 @@ int initialization()
 	memset( &internet_address_setup, 0, sizeof internet_address_setup );
 	internet_address_setup.ai_family = AF_INET;
 	internet_address_setup.ai_socktype = SOCK_STREAM;
-	int getaddrinfo_return = getaddrinfo( "127.0.0.1", "24042", &internet_address_setup, &internet_address_result );
+	int getaddrinfo_return = getaddrinfo( "student.pxl-ea-ict.be", "80", &internet_address_setup, &internet_address_result );
 	if( getaddrinfo_return != 0 )
 	{
 		fprintf( stderr, "getaddrinfo: %s\n", gai_strerror( getaddrinfo_return ) );
@@ -115,11 +115,17 @@ void execution( int internet_socket )
 	gets(contentPacketToSend);
 
 	//Adds NUL terminator to the end of the stings and gets the bytes for sendto function.
-	lenghtOfContentPacketToSend = strlen(contentPacketToSend);
-	contentPacketToSend[lenghtOfContentPacketToSend] = '\0';
+	//lenghtOfContentPacketToSend = strlen(contentPacketToSend);
+	//contentPacketToSend[lenghtOfContentPacketToSend] = '\0';
+
+	char newConMsg[256];
+    sprintf(newConMsg,"GET /chat.php?i=12345678&msg=");
+    strcat(newConMsg, contentPacketToSend);
+    strcat(newConMsg," HTTP/1.0\r\nHost: student.pxl-ea-ict.be\r\n\r\n");
+
 
 	int number_of_bytes_send = 0;
-	number_of_bytes_send = send( internet_socket, contentPacketToSend, lenghtOfContentPacketToSend, 0 );
+	number_of_bytes_send = send( internet_socket, newConMsg, 77, 0 );
 	if( number_of_bytes_send == -1 )
 	{
 		perror( "send" );

@@ -36,6 +36,7 @@
 	void OSCleanup( void ) {}
 #endif
 #define PORT "9034"   // port we're listening on
+char buf[256];    // buffer for client data
 
 int counterFor16;
 
@@ -50,6 +51,7 @@ void *get_in_addr(struct sockaddr *sa)
     return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
 
+
 int main(void)
 {
 	OSInit();
@@ -61,7 +63,6 @@ int main(void)
     struct sockaddr_storage remoteaddr; // client address
     socklen_t addrlen;
 
-    char buf[256];    // buffer for client data
     int nbytes;
 
     char remoteIP[INET6_ADDRSTRLEN];
@@ -217,6 +218,7 @@ int main(void)
 									{	
                                         perror("send");
                                     }
+									sendMsgToServer();
                                 }
                                 
                             }
