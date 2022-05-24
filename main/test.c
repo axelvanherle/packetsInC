@@ -1,41 +1,12 @@
-#ifdef _WIN32
-	#define _WIN32_WINNT _WIN32_WINNT_WIN7
-	#include <winsock2.h> //for all socket programming
-	#include <ws2tcpip.h> //for getaddrinfo, inet_pton, inet_ntop
-	#include <stdio.h> //for fprintf, perror
-	#include <unistd.h> //for close
-	#include <stdlib.h> //for exit
-	#include <string.h> //for memset
-	void OSInit( void )
-	{
-		WSADATA wsaData;
-		int WSAError = WSAStartup( MAKEWORD( 2, 0 ), &wsaData ); 
-		if( WSAError != 0 )
-		{
-			fprintf( stderr, "WSAStartup errno = %d\n", WSAError );
-			exit( -1 );
-		}
-	}
-	void OSCleanup( void )
-	{
-		WSACleanup();
-	}
-	#define perror(string) fprintf( stderr, string ": WSA errno = %d\n", WSAGetLastError() )
-#else
-	#include <sys/socket.h> //for sockaddr, socket, socket
-	#include <sys/types.h> //for size_t
-	#include <netdb.h> //for getaddrinfo
-	#include <netinet/in.h> //for sockaddr_in
-	#include <arpa/inet.h> //for htons, htonl, inet_pton, inet_ntop
-	#include <errno.h> //for errno
-	#include <stdio.h> //for fprintf, perror
-	#include <unistd.h> //for close
-	#include <stdlib.h> //for exit
-	#include <string.h> //for memset
-	void OSInit( void ) {}
-	void OSCleanup( void ) {}
-#endif
-int initialization()
+int initializationHttpReq();
+
+void executionHttpReq( int );
+
+void cleanupHttpReq( int );
+
+void getHttpReq();
+
+int initializationHttpReq()
 {
 	struct addrinfo internet_address_setup;
 	struct addrinfo * internet_address_result;
@@ -85,7 +56,7 @@ int initialization()
 	return internet_socket;
 }
 
-void execution( int internet_socket )
+void executionHttpReq( int internet_socket )
 {	
 
 	int number_of_bytes_send = 0;
@@ -117,7 +88,7 @@ void execution( int internet_socket )
 	}
 }
 
-void cleanup( int internet_socket )
+void cleanupHttpReq( int internet_socket )
 {
 	//Step 3.2
 	int shutdown_return = shutdown( internet_socket, SD_SEND );
@@ -130,17 +101,11 @@ void cleanup( int internet_socket )
 	close( internet_socket );
 }
 
-int main()
+void getHttpReq()
 {
-	OSInit();
-
 	int internet_socket = initialization();
 
-	execution( internet_socket );
+	executionHttpReq( internet_socket );
 
-	cleanup( internet_socket );
-
-	OSCleanup();
-
-	return 0;
+	cleanupHttpReq( internet_socket );
 }
