@@ -59,7 +59,7 @@ Je maakt een 4 applicaties (UDP Client, UDP Server, TCP Client en TCP Server) di
  
 - [x]  Server kan HTTP communicatie uitvoeren met de webserver (bewijs via WireShark) [2/25]
  
- - [ ] *Server stuurt over HTTP de chatberichten door naar de webserver (bewijs via WireShark) [2/25]
+ - [X] *Server stuurt over HTTP de chatberichten door naar de webserver (bewijs via WireShark) [2/25]
  
 - [x]  *Server vraagt de laatste 16 chatberichten via HTTP aan de webserver (bij start) [2/25]
  
