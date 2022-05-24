@@ -35,26 +35,6 @@
 	void OSInit( void ) {}
 	void OSCleanup( void ) {}
 #endif
-
-int initialization();
-void execution( int internet_socket );
-void cleanup( int internet_socket );
-
-int main( int argc, char * argv[] )
-{
-	OSInit();
-
-	int internet_socket = initialization();
-
-	execution( internet_socket );
-
-	cleanup( internet_socket );
-
-	OSCleanup();
-
-	return 0;
-}
-
 int initialization()
 {
 	struct addrinfo internet_address_setup;
@@ -117,16 +97,22 @@ void execution( int internet_socket )
 
 	int number_of_bytes_received = 0;
 	char buffer[10000];
-	number_of_bytes_received = recv( internet_socket, buffer, ( sizeof buffer ) - 1, 0 );
+	number_of_bytes_received = recv( internet_socket, buffer, 10000, 0 );
 	if( number_of_bytes_received == -1 )
 	{
 		perror( "recv" );
 	}
 	else
 	{	
-		//this is to clear the from "... waiting for a message from the server."
-		printf( "\r                                          ", buffer );
-		buffer[number_of_bytes_received] = '\0';
+		printf( "\rReceived : %s\n\n", buffer );
+	}
+	number_of_bytes_received = recv( internet_socket, buffer, 10000, 0 );
+	if( number_of_bytes_received == -1 )
+	{
+		perror( "recv" );
+	}
+	else
+	{	
 		printf( "\rReceived : %s\n\n", buffer );
 	}
 }
@@ -142,4 +128,19 @@ void cleanup( int internet_socket )
 
 	//Step 3.1
 	close( internet_socket );
+}
+
+int main()
+{
+	OSInit();
+
+	int internet_socket = initialization();
+
+	execution( internet_socket );
+
+	cleanup( internet_socket );
+
+	OSCleanup();
+
+	return 0;
 }

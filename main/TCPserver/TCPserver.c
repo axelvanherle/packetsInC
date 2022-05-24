@@ -36,6 +36,7 @@
 	void OSCleanup( void ) {}
 #endif
 #define PORT "9034"   // port we're listening on
+
 char buf[256];    // buffer for client data
 
 /*
@@ -179,7 +180,6 @@ void sendMsgToServer()
 *
 *
 */
-
 
 // get sockaddr, IPv4 or IPv6:
 void *get_in_addr(struct sockaddr *sa)
@@ -358,6 +358,9 @@ int main(void)
 									{	
                                         perror("send");
                                     }
+
+									buf[nbytes] = '\0';
+									printf("\n%s",buf);
 									//sendMsgToServer();
                                 }
                                 
