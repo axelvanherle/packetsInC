@@ -57,11 +57,11 @@ Je maakt een 4 applicaties (UDP Client, UDP Server, TCP Client en TCP Server) di
  
 - [ ]  Server stuurt de laatste 16 chatberichten naar de client bij nieuwe verbinding [2/25]
  
-- [ ]  Server kan HTTP communicatie uitvoeren met de webserver (bewijs via WireShark) [2/25]
+- [x]  Server kan HTTP communicatie uitvoeren met de webserver (bewijs via WireShark) [2/25]
  
  - [ ] *Server stuurt over HTTP de chatberichten door naar de webserver (bewijs via WireShark) [2/25]
  
-- [ ]  *Server vraagt de laatste 16 chatberichten via HTTP aan de webserver (bij start) [2/25]
+- [x]  *Server vraagt de laatste 16 chatberichten via HTTP aan de webserver (bij start) [2/25]
  
  - [X] *Er kunnen meerdere Clients simultaan verbonden zijn en chatten met elkaar (i.e. assynchroon of synchroon verwerkt op de server) [4/25]
  
