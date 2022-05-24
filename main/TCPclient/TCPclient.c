@@ -117,7 +117,7 @@ void execution( int internet_socket )
     
 	gets(contentPacketToSend);
 
-	//Adds NUL terminator to the end of the stings and gets the bytes for sendto function.
+	//Adds /0 terminator to the end of the stings and gets the bytes for sendto function
 	lenghtOfContentPacketToSend = strlen(contentPacketToSend);
 	contentPacketToSend[lenghtOfContentPacketToSend] = '\0';
 
@@ -129,7 +129,7 @@ void execution( int internet_socket )
 		perror( "send" );
 	}
 
-	printf("... waiting for recv");
+	printf("... waiting for a message from the server.");
 
 	int number_of_bytes_received = 0;
 	char buffer[10000];
@@ -139,7 +139,9 @@ void execution( int internet_socket )
 		perror( "recv" );
 	}
 	else
-	{
+	{	
+		//this is to clear the from "... waiting for a message from the server."
+		printf( "\r                                          ", buffer );
 		buffer[number_of_bytes_received] = '\0';
 		printf( "\rReceived : %s\n\n", buffer );
 	}
