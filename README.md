@@ -55,7 +55,7 @@ Je maakt een 4 applicaties (UDP Client, UDP Server, TCP Client en TCP Server) di
  
 - [X]  Server stuurt de afzender informatie mee met het bericht (i.e. IP-adres + poort van zender) OF Server stuurt de informatie van nieuwe client connectie naar alle andere geconnecteerde clients (i.e. IP-adres + poort van zender) [2/25]
  
-- [ ]  Server stuurt de laatste 16 chatberichten naar de client bij nieuwe verbinding [2/25]
+- [X]  Server stuurt de laatste 16 chatberichten naar de client bij nieuwe verbinding [2/25]
  
 - [x]  Server kan HTTP communicatie uitvoeren met de webserver (bewijs via WireShark) [2/25]
  
