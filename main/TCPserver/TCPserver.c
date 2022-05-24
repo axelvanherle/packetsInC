@@ -39,158 +39,20 @@
 
 char buf[256];    // buffer for client data
 
-/*
-*
-*
-*   START OF CODE TO SEND MESSAGE TO THE HTTP SERVER.
-*
-*
-*/
+//START OF CODE TO SEND MESSAGE TO THE HTTP SERVER.
 
-int clientInitialization()
-{
-	struct addrinfo internet_address_setup;
-	struct addrinfo * internet_address_result;
-	memset( &internet_address_setup, 0, sizeof internet_address_setup );
-	internet_address_setup.ai_family = AF_INET;
-	internet_address_setup.ai_socktype = SOCK_STREAM;
-	int getaddrinfo_return = getaddrinfo( "student.pxl-ea-ict.be", "80", &internet_address_setup, &internet_address_result );
-	if( getaddrinfo_return != 0 )
-	{
-		fprintf( stderr, "getaddrinfo: %s\n", gai_strerror( getaddrinfo_return ) );
-		exit( 1 );
-	}
+int clientInitialization();
 
-	int internet_socket = -1;
-	struct addrinfo * internet_address_result_iterator = internet_address_result;
-	while( internet_address_result_iterator != NULL )
-	{
-		internet_socket = socket( internet_address_result_iterator->ai_family, internet_address_result_iterator->ai_socktype, internet_address_result_iterator->ai_protocol );
-		if( internet_socket == -1 )
-		{
-			perror( "socket" );
-		}
-		else
-		{
-			int connect_return = connect( internet_socket, internet_address_result_iterator->ai_addr, internet_address_result_iterator->ai_addrlen );
-			if( connect_return == -1 )
-			{
-				perror( "connect" );
-				close( internet_socket );
-			}
-			else
-			{
-				break;
-			}
-		}
-		internet_address_result_iterator = internet_address_result_iterator->ai_next;
-	}
+void clientExecution( int );
 
-	freeaddrinfo( internet_address_result );
+void clientCleanup( int );
 
-	if( internet_socket == -1 )
-	{
-		fprintf( stderr, "socket: no valid socket address found\n" );
-		exit( 2 );
-	}
+void sendMsgToServer();
 
-	return internet_socket;
-}
-
-void clientExecution( int internet_socket )
-{	
-    int lenghtOfContentPacketToSend;
-	char contentPacketToSend[256]; 
-
-	printf("What should the content of the packet be?\n");
-    
-	//gets(contentPacketToSend);
-	/*
-	char *src, *dst;
-	for (src = buf, dst = contentPacketToSend; *src; src++) {
-   	if ('a' <= *src && *src <= 'z' 
-    || '0' <= *src && *src <= '9' 
-    || *src == '_') *dst++ = *src;
-	}		
-	*dst = '\0';
-	*/
-	memset(contentPacketToSend,0,strlen(contentPacketToSend));
-
-	strcpy(contentPacketToSend,buf);
-
-	char newConMsg[256];
-	memset(newConMsg,0,strlen(newConMsg));
-    sprintf(newConMsg,"GET /chat.php?i=12345678&msg=");
-    strcat(newConMsg, contentPacketToSend);
-    strcat(newConMsg," HTTP/1.0\r\nHost: student.pxl-ea-ict.be\r\n\r\n");
-
-	printf("\n-----------\n MESSAGE SENT:%s \n------------\n",newConMsg);
-
-
-	int number_of_bytes_send = 0;
-	number_of_bytes_send = send( internet_socket, newConMsg, (strlen(newConMsg)+1), 0 );
-	if( number_of_bytes_send == -1 )
-	{
-		perror( "send" );
-	}
-
-	memset(contentPacketToSend,0,strlen(contentPacketToSend));
-
-	int number_of_bytes_received = 0;
-	char buffer[10000];
-	//number_of_bytes_received = recv( internet_socket, buffer, ( sizeof buffer ) - 1, 0 );
-	if( number_of_bytes_received == -1 )
-	{
-		perror( "recv" );
-	}
-	else
-	{
-		buffer[number_of_bytes_received] = '\0';
-		printf( "Received : %s\n", buffer );
-	}
-
-}
-
-void clientCleanup( int internet_socket )
-{
-	//Step 3.2
-	int shutdown_return = shutdown( internet_socket, SD_SEND );
-	if( shutdown_return == -1 )
-	{
-		perror( "shutdown" );
-	}
-
-	//Step 3.1
-	close( internet_socket );
-}
-
-void sendMsgToServer()
-{
-    int internet_socket = clientInitialization();
-
-    clientExecution( internet_socket );
-
-	clientCleanup( internet_socket );
-}
-
-/*
-*
-*
-*   END OF CODE TO SEND MESSAGE TO THE HTTP SERVER.
-*
-*
-*/
+//END OF CODE TO SEND MESSAGE TO THE HTTP SERVER.
 
 // get sockaddr, IPv4 or IPv6:
-void *get_in_addr(struct sockaddr *sa)
-{
-    if (sa->sa_family == AF_INET) 
-	{
-        return &(((struct sockaddr_in*)sa)->sin_addr);
-    }
-
-    return &(((struct sockaddr_in6*)sa)->sin6_addr);
-}
+void *get_in_addr(struct sockaddr *sa);
 
 int main(void)
 {
@@ -374,3 +236,155 @@ int main(void)
     OSCleanup();
     return 0;
 }
+
+void *get_in_addr(struct sockaddr *sa)
+{
+    if (sa->sa_family == AF_INET) 
+	{
+        return &(((struct sockaddr_in*)sa)->sin_addr);
+    }
+
+    return &(((struct sockaddr_in6*)sa)->sin6_addr);
+}
+
+/*
+*
+*
+*   START OF CODE TO SEND MESSAGE TO THE HTTP SERVER.
+*
+*
+*/
+
+int clientInitialization()
+{
+	struct addrinfo internet_address_setup;
+	struct addrinfo * internet_address_result;
+	memset( &internet_address_setup, 0, sizeof internet_address_setup );
+	internet_address_setup.ai_family = AF_INET;
+	internet_address_setup.ai_socktype = SOCK_STREAM;
+	int getaddrinfo_return = getaddrinfo( "student.pxl-ea-ict.be", "80", &internet_address_setup, &internet_address_result );
+	if( getaddrinfo_return != 0 )
+	{
+		fprintf( stderr, "getaddrinfo: %s\n", gai_strerror( getaddrinfo_return ) );
+		exit( 1 );
+	}
+
+	int internet_socket = -1;
+	struct addrinfo * internet_address_result_iterator = internet_address_result;
+	while( internet_address_result_iterator != NULL )
+	{
+		internet_socket = socket( internet_address_result_iterator->ai_family, internet_address_result_iterator->ai_socktype, internet_address_result_iterator->ai_protocol );
+		if( internet_socket == -1 )
+		{
+			perror( "socket" );
+		}
+		else
+		{
+			int connect_return = connect( internet_socket, internet_address_result_iterator->ai_addr, internet_address_result_iterator->ai_addrlen );
+			if( connect_return == -1 )
+			{
+				perror( "connect" );
+				close( internet_socket );
+			}
+			else
+			{
+				break;
+			}
+		}
+		internet_address_result_iterator = internet_address_result_iterator->ai_next;
+	}
+
+	freeaddrinfo( internet_address_result );
+
+	if( internet_socket == -1 )
+	{
+		fprintf( stderr, "socket: no valid socket address found\n" );
+		exit( 2 );
+	}
+
+	return internet_socket;
+}
+
+void clientExecution( int internet_socket )
+{	
+    int lenghtOfContentPacketToSend;
+	char contentPacketToSend[256]; 
+
+	printf("What should the content of the packet be?\n");
+    
+	//gets(contentPacketToSend);
+	/*
+	char *src, *dst;
+	for (src = buf, dst = contentPacketToSend; *src; src++) {
+   	if ('a' <= *src && *src <= 'z' 
+    || '0' <= *src && *src <= '9' 
+    || *src == '_') *dst++ = *src;
+	}		
+	*dst = '\0';
+	*/
+	memset(contentPacketToSend,0,strlen(contentPacketToSend));
+
+	strcpy(contentPacketToSend,buf);
+
+	char newConMsg[256];
+	memset(newConMsg,0,strlen(newConMsg));
+    sprintf(newConMsg,"GET /chat.php?i=12345678&msg=");
+    strcat(newConMsg, contentPacketToSend);
+    strcat(newConMsg," HTTP/1.0\r\nHost: student.pxl-ea-ict.be\r\n\r\n");
+
+	printf("\n-----------\n MESSAGE SENT:%s \n------------\n",newConMsg);
+
+
+	int number_of_bytes_send = 0;
+	number_of_bytes_send = send( internet_socket, newConMsg, (strlen(newConMsg)+1), 0 );
+	if( number_of_bytes_send == -1 )
+	{
+		perror( "send" );
+	}
+
+	memset(contentPacketToSend,0,strlen(contentPacketToSend));
+
+	int number_of_bytes_received = 0;
+	char buffer[10000];
+	//number_of_bytes_received = recv( internet_socket, buffer, ( sizeof buffer ) - 1, 0 );
+	if( number_of_bytes_received == -1 )
+	{
+		perror( "recv" );
+	}
+	else
+	{
+		buffer[number_of_bytes_received] = '\0';
+		printf( "Received : %s\n", buffer );
+	}
+
+}
+
+void clientCleanup( int internet_socket )
+{
+	//Step 3.2
+	int shutdown_return = shutdown( internet_socket, SD_SEND );
+	if( shutdown_return == -1 )
+	{
+		perror( "shutdown" );
+	}
+
+	//Step 3.1
+	close( internet_socket );
+}
+
+void sendMsgToServer()
+{
+    int internet_socket = clientInitialization();
+
+    clientExecution( internet_socket );
+
+	clientCleanup( internet_socket );
+}
+
+/*
+*
+*
+*   END OF CODE TO SEND MESSAGE TO THE HTTP SERVER.
+*
+*
+*/
