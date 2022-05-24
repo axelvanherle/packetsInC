@@ -39,35 +39,27 @@
 
 char buf[256];    // buffer for client data
 
-//START OF CODE TO SEND MESSAGE TO THE HTTP SERVER.
+//These functions are to send the buf to the HTPP server.
+int initializationMsg();
+void executionMsg( int );
+void cleanupMsg( int );
+void sendMsgToHttp();
 
-int clientInitialization();
-
-void clientExecution( int );
-
-void clientCleanup( int );
-
-void sendMsgToServer();
-
-//END OF CODE TO SEND MESSAGE TO THE HTTP SERVER.
-
-//START GET HTTP REQ
+//These functions get the latest 16 messages on the HTPP server.
 int initializationHttpReq();
-
 void executionHttpReq( int );
-
 void cleanupHttpReq( int );
-
 void getHttpReq();
-//END HTTP REQ
 
-// get sockaddr, IPv4 or IPv6:
+//This function gets sockaddr, IPv4 or IPv6.
 void *get_in_addr(struct sockaddr *sa);
 
 int main(void)
 {
 	OSInit();
-
+	strcpy(buf,"Test");
+	sendMsgToHttp();
+	//Gets latest 16 messages.
 	getHttpReq();
 	printf("Server is now waiting for incomming connections.\n");
 
@@ -97,21 +89,25 @@ int main(void)
     hints.ai_family = AF_INET;
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags = AI_PASSIVE;
-    if ((rv = getaddrinfo(NULL, PORT, &hints, &ai)) != 0) {
+    if ((rv = getaddrinfo(NULL, PORT, &hints, &ai)) != 0) 
+	{
         fprintf(stderr, "selectserver: %s\n", gai_strerror(rv));
         exit(1);
     }
     
-    for(p = ai; p != NULL; p = p->ai_next) {
+    for(p = ai; p != NULL; p = p->ai_next) 
+	{
         listener = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
-        if (listener < 0) { 
+        if (listener < 0) 
+		{ 
             continue;
         }
         
         // lose the pesky "address already in use" error message
         setsockopt(listener, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
 
-        if (bind(listener, p->ai_addr, p->ai_addrlen) < 0) {
+        if (bind(listener, p->ai_addr, p->ai_addrlen) < 0) 
+		{
             close(listener);
             continue;
         }
@@ -119,7 +115,8 @@ int main(void)
     }
 
     // if we got here, it means we didn't get bound
-    if (p == NULL) {
+    if (p == NULL) 
+	{
         fprintf(stderr, "selectserver: failed to bind\n");
         exit(2);
     }
@@ -127,7 +124,8 @@ int main(void)
     freeaddrinfo(ai); // all done with this
 
     // listen
-    if (listen(listener, 10) == -1) {
+    if (listen(listener, 10) == -1) 
+	{
         perror("listen");
         exit(3);
     }
@@ -139,7 +137,8 @@ int main(void)
     fdmax = listener; // so far, it's this one
 
     // main loop
-    for(;;) {
+    for(;;) 
+	{
         read_fds = master; // copy it
         if (select(fdmax+1, &read_fds, NULL, NULL, NULL) == -1)
 		{
@@ -166,14 +165,15 @@ int main(void)
                     if (newfd == -1) 
 					{
                         perror("accept");
-                    } else
+                    } 
+					else
 					{
                         FD_SET(newfd, &master); // add to master set
                         if (newfd > fdmax) 
 						{   // keep track of the max
 							fdmax = newfd;
                         }
-                        printf("selectserver: new connection from %s on ""socket %d\n",inet_ntop(remoteaddr.ss_family,get_in_addr((struct sockaddr*)&remoteaddr),remoteIP, INET6_ADDRSTRLEN),newfd);
+                        printf("SERVER MESSAGE: new connection from %s on ""socket %d\n",inet_ntop(remoteaddr.ss_family,get_in_addr((struct sockaddr*)&remoteaddr),remoteIP, INET6_ADDRSTRLEN),newfd);
 
 						//Sends that a new client got connected to everyone.
                         char newConMsg[256];
@@ -212,7 +212,7 @@ int main(void)
                         if (nbytes == 0) 
 						{
                             // connection closed
-                            printf("selectserver: socket %d hung up\n", i);
+                            printf("SERVER MESSAGE: socket %d hung up\n", i);
                         } else 
 						{
                             perror("recv");
@@ -236,8 +236,10 @@ int main(void)
                                         perror("send");
                                     }
 
-									buf[nbytes] = '\0';
-									//sendMsgToServer();
+									sendMsgToHttp();
+
+									//buf[nbytes] = '\0';
+
 
                                 }
                                 
@@ -270,12 +272,12 @@ void *get_in_addr(struct sockaddr *sa)
 *
 */
 
-int clientInitialization()
+int initializationMsg()
 {
 	struct addrinfo internet_address_setup;
 	struct addrinfo * internet_address_result;
 	memset( &internet_address_setup, 0, sizeof internet_address_setup );
-	internet_address_setup.ai_family = AF_INET;
+	internet_address_setup.ai_family = AF_UNSPEC;
 	internet_address_setup.ai_socktype = SOCK_STREAM;
 	int getaddrinfo_return = getaddrinfo( "student.pxl-ea-ict.be", "80", &internet_address_setup, &internet_address_result );
 	if( getaddrinfo_return != 0 )
@@ -320,12 +322,26 @@ int clientInitialization()
 	return internet_socket;
 }
 
-void clientExecution( int internet_socket )
+void executionMsg( int internet_socket )
 {	
-    int lenghtOfContentPacketToSend;
+	int lenghtOfContentPacketToSend;
 	char contentPacketToSend[256]; 
 
-	memset(contentPacketToSend,0,strlen(contentPacketToSend));
+	for (int i = 0, j; buf[i] != '\0'; ++i) 
+	{
+      // enter the loop if the character is not an alphabet
+      // and not the null character
+      while (!(buf[i] >= 'a' && buf[i] <= 'z') && !(buf[i] >= 'A' && buf[i] <= 'Z') && !(buf[i] == '\0')) 
+	  {
+         for (j = i; buf[j] != '\0'; ++j) 
+		 {
+            // if jth element of line is not an alphabet,
+            // assign the value of (j+1)th element to the jth element
+            buf[j] = buf[j + 1];
+         }
+         buf[j] = '\0';
+      }
+   }
 
 	strcpy(contentPacketToSend,buf);
 
@@ -335,34 +351,15 @@ void clientExecution( int internet_socket )
     strcat(newConMsg, contentPacketToSend);
     strcat(newConMsg," HTTP/1.0\r\nHost: student.pxl-ea-ict.be\r\n\r\n");
 
-	printf("\n-----------\n MESSAGE SENT:%s \n------------\n",newConMsg);
-
-
 	int number_of_bytes_send = 0;
-	number_of_bytes_send = send( internet_socket, newConMsg, (strlen(newConMsg)+1), 0 );
+	number_of_bytes_send = send( internet_socket, newConMsg, 200, 0 );
 	if( number_of_bytes_send == -1 )
 	{
 		perror( "send" );
 	}
-
-	memset(contentPacketToSend,0,strlen(contentPacketToSend));
-
-	int number_of_bytes_received = 0;
-	char buffer[10000];
-	//number_of_bytes_received = recv( internet_socket, buffer, ( sizeof buffer ) - 1, 0 );
-	if( number_of_bytes_received == -1 )
-	{
-		perror( "recv" );
-	}
-	else
-	{
-		buffer[number_of_bytes_received] = '\0';
-		printf( "Received : %s\n", buffer );
-	}
-
 }
 
-void clientCleanup( int internet_socket )
+void cleanupMsg( int internet_socket )
 {
 	//Step 3.2
 	int shutdown_return = shutdown( internet_socket, SD_SEND );
@@ -375,13 +372,14 @@ void clientCleanup( int internet_socket )
 	close( internet_socket );
 }
 
-void sendMsgToServer()
+void sendMsgToHttp()
 {
-    int internet_socket = clientInitialization();
+	int internet_socket = initializationMsg();
 
-    clientExecution( internet_socket );
+	executionMsg( internet_socket );
 
-	clientCleanup( internet_socket );
+	cleanupMsg( internet_socket );
+
 }
 
 /*

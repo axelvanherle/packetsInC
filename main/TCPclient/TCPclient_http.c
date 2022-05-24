@@ -1,12 +1,42 @@
-int initializationMsg();
+#ifdef _WIN32
+	#define _WIN32_WINNT _WIN32_WINNT_WIN7
+	#include <winsock2.h> //for all socket programming
+	#include <ws2tcpip.h> //for getaddrinfo, inet_pton, inet_ntop
+	#include <stdio.h> //for fprintf, perror
+	#include <unistd.h> //for close
+	#include <stdlib.h> //for exit
+	#include <string.h> //for memset
+	void OSInit( void )
+	{
+		WSADATA wsaData;
+		int WSAError = WSAStartup( MAKEWORD( 2, 0 ), &wsaData ); 
+		if( WSAError != 0 )
+		{
+			fprintf( stderr, "WSAStartup errno = %d\n", WSAError );
+			exit( -1 );
+		}
+	}
+	void OSCleanup( void )
+	{
+		WSACleanup();
+	}
+	#define perror(string) fprintf( stderr, string ": WSA errno = %d\n", WSAGetLastError() )
+#else
+	#include <sys/socket.h> //for sockaddr, socket, socket
+	#include <sys/types.h> //for size_t
+	#include <netdb.h> //for getaddrinfo
+	#include <netinet/in.h> //for sockaddr_in
+	#include <arpa/inet.h> //for htons, htonl, inet_pton, inet_ntop
+	#include <errno.h> //for errno
+	#include <stdio.h> //for fprintf, perror
+	#include <unistd.h> //for close
+	#include <stdlib.h> //for exit
+	#include <string.h> //for memset
+	void OSInit( void ) {}
+	void OSCleanup( void ) {}
+#endif
 
-void executionMsg( int );
-
-void cleanupMsg( int );
-
-int sendMsgToHttp();
-
-int initializationMsg()
+int initialization()
 {
 	struct addrinfo internet_address_setup;
 	struct addrinfo * internet_address_result;
@@ -56,7 +86,7 @@ int initializationMsg()
 	return internet_socket;
 }
 
-void executionMsg( int internet_socket )
+void execution( int internet_socket )
 {	
 	int lenghtOfContentPacketToSend;
 	char contentPacketToSend[256]; 
@@ -98,7 +128,7 @@ void executionMsg( int internet_socket )
 	}
 }
 
-void cleanupMsg( int internet_socket )
+void cleanup( int internet_socket )
 {
 	//Step 3.2
 	int shutdown_return = shutdown( internet_socket, SD_SEND );
@@ -111,13 +141,17 @@ void cleanupMsg( int internet_socket )
 	close( internet_socket );
 }
 
-int sendMsgToHttp()
+int main()
 {
-	int internet_socket = initializationMsg();
+	OSInit();
 
-	executionMsg( internet_socket );
+	int internet_socket = initialization();
 
-	cleanupMsg( internet_socket );
+	execution( internet_socket );
+
+	cleanup( internet_socket );
+
+	OSCleanup();
 
 	return 0;
 }
