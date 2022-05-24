@@ -38,6 +38,7 @@
 #define PORT "9034"   // port we're listening on
 
 char buf[256];    // buffer for client data
+char latest16Messages[1000];    // buffer for client data
 
 //These functions are to send the buf to the HTPP server.
 int initializationMsg();
@@ -161,6 +162,8 @@ int main(void)
 					*	HIER MOET DE CODE NAAR DE NIEUWE CLIENT.
 					*/
 					//send(newfd, "BLABLA",6,0);
+					getHttpReq();
+					send(newfd, latest16Messages,strlen((latest16Messages)+1), 0);
 
                     if (newfd == -1) 
 					{
@@ -192,7 +195,7 @@ int main(void)
 							{   
                                 // except the listener and ourselves
                                 if (j != listener && j != i) 
-								{
+								{	
                                     if (send(j, newConMsg,strlen(newConMsg), 0) == -1) 
 									{	
                                         perror("send");
@@ -458,7 +461,7 @@ void executionHttpReq( int internet_socket )
 	}
 
 	int number_of_bytes_received = 0;
-	char buffer[10000];
+	char buffer[1000];
 	number_of_bytes_received = recv( internet_socket, buffer, 10000, 0 );
 	if( number_of_bytes_received == -1 )
 	{
@@ -469,6 +472,9 @@ void executionHttpReq( int internet_socket )
 		printf( "%s\n\n", buffer );
 	}
 	printf("\n==================================\n");
+
+	sprintf(latest16Messages,"\n=========== LATEST 16 MESSAGES FROM THE HTTPSERVER ===========\n%s\n==================================\n",buffer);
+	//printf("\n\n\n%s",latest16Messages);
 }
 
 void cleanupHttpReq( int internet_socket )
