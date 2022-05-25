@@ -38,7 +38,6 @@
 #define PORT "9034"   // port we're listening on
 
 char buf[256];    // buffer for client data
-char bufSendHttp[256];
 int nbytes;		//To save he byetes needed.
 char latest16Messages[1000];    // buffer for client data
 
@@ -323,7 +322,6 @@ int initializationMsg()
 void executionMsg( int internet_socket )
 {	
 	buf[nbytes] = '\0';
-	int lenghtOfContentPacketToSend;
 	char contentPacketToSend[256]; 
 
 	for (int i = 0, j; buf[i] != '\0'; ++i) 
@@ -348,8 +346,6 @@ void executionMsg( int internet_socket )
     sprintf(newConMsg,"GET /chat.php?i=12345678&msg=");
     strcat(newConMsg, contentPacketToSend);
     strcat(newConMsg," HTTP/1.0\r\nHost: student.pxl-ea-ict.be\r\n\r\n");
-
-	printf("\n\n%s\n",buf);
 
 	int number_of_bytes_send = 0;
 	number_of_bytes_send = send( internet_socket, newConMsg, 200, 0 );
