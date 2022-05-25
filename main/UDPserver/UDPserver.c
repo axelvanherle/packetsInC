@@ -165,6 +165,11 @@ void execution( int internet_socket )
 
 	else if (userChoice == 2)
 	{
+		double trash;
+		double stats1[3];
+		double stats2[3];
+		double stats3[3];
+
 		int packetLossCounterTimeout = 0;
 		int packetLossCounterTimeoutPrint = 0;
 		double packetLossCounterTimeoutPercentage = 0.0;
@@ -228,6 +233,8 @@ void execution( int internet_socket )
 				buffer[number_of_bytes_received] = '\0';
 				printf( "Packet [ %d ]: %s\n",amountOfPacketsToReceive, buffer);
 				fprintf(OUTPUTFILE,"Packet [ %d ]: %s\n",amountOfPacketsToReceive, buffer);
+
+				sscanf(buffer, "%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf",&trash,&trash,&stats1[0],&stats1[1],&stats1[2],&trash,&stats2[0],&stats2[1],&stats2[2],&trash,&stats3[0],&stats3[1],&stats3[2]);
 			}
 
 			int number_of_bytes_send = 0;
@@ -252,6 +259,14 @@ void execution( int internet_socket )
 
 		printf("You expected %d packets, due to timeouts you only received %d packets. That is a %.2f%% loss.",amountOfPacketsToReceivePrint,packetLossCounterTimeoutPrint,packetLossCounterTimeoutPercentage);
 		fprintf(OUTPUTFILESTATS,"You expected %d packets, due to timeouts you only received %d packets. That is a %.2f%% loss.",amountOfPacketsToReceivePrint,packetLossCounterTimeoutPrint,packetLossCounterTimeoutPercentage,time_spent);
+
+		for (int i = 0; i < 3; i++)
+		{
+			printf("%lf\n",stats1[i]);
+			printf("%lf\n",stats2[i]);
+			printf("%lf\n",stats3[i]);
+		}
+		
 	}
 
 	else
