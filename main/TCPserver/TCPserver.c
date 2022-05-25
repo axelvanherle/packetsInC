@@ -38,6 +38,7 @@
 #define PORT "9034"   // port we're listening on
 
 char buf[256];    // buffer for client data
+char bufSendHttp[256];
 int nbytes;		//To save he byetes needed.
 char latest16Messages[1000];    // buffer for client data
 
@@ -68,6 +69,7 @@ int main(void)
 
 	//Gets latest 16 messages.
 	getHttpReq();
+	printf("\n\n\nThose are the latest 16 messages saved on the HTTP server.\n");
 	printf("Server is now waiting for incomming connections.\n");
 
 
@@ -181,7 +183,7 @@ int main(void)
 
 						//Sends that a new client got connected to everyone.
                         char newConMsg[256];
-                        sprintf(newConMsg,"New connection from ");
+                        sprintf(newConMsg,"\nNew connection from ");
                         strcat(newConMsg, inet_ntop(remoteaddr.ss_family,get_in_addr((struct sockaddr*)&remoteaddr),remoteIP, INET6_ADDRSTRLEN));
                         strcat(newConMsg," on socket ");
                         char newfdString[4];
@@ -225,8 +227,17 @@ int main(void)
                         FD_CLR(i, &master); // remove from master set
                     } 
 					else 
-					{
+					{	
+						
                         // we got some data from a client
+						for (int i = 0; i < nbytes; i++)
+						{
+							bufSendHttp[i] = buf[i];
+						}
+						bufSendHttp[strlen(bufSendHttp)] = '\0';
+						printf("\n%s",bufSendHttp);
+						sendMsgToHttp();
+						
                         for(j = 0; j <= fdmax; j++) 
 						{  
                             // send to everyone!
@@ -239,7 +250,6 @@ int main(void)
 									{	
                                         perror("send");
                                     }
-									sendMsgToHttp();
                                 }
                                 
                             }
@@ -264,13 +274,8 @@ void *get_in_addr(struct sockaddr *sa)
 }
 
 /*
-*
-*
-*   START OF CODE TO SEND MESSAGE TO THE HTTP SERVER.
-*
-*
+*	START OF SENDING MESSAGES TO THE HTTP SERVER.
 */
-
 int initializationMsg()
 {
 	struct addrinfo internet_address_setup;
@@ -323,27 +328,26 @@ int initializationMsg()
 
 void executionMsg( int internet_socket )
 {	
-	buf[nbytes] = '\0';
 	int lenghtOfContentPacketToSend;
 	char contentPacketToSend[256]; 
 
-	for (int i = 0, j; buf[i] != '\0'; ++i) 
+	for (int i = 0, j; bufSendHttp[i] != '\0'; ++i) 
 	{
       // enter the loop if the character is not an alphabet
       // and not the null character
-      while (!(buf[i] >= 'a' && buf[i] <= 'z') && !(buf[i] >= 'A' && buf[i] <= 'Z') && !(buf[i] == '\0')) 
+      while (!(bufSendHttp[i] >= 'a' && bufSendHttp[i] <= 'z') && !(bufSendHttp[i] >= 'A' && bufSendHttp[i] <= 'Z') && !(bufSendHttp[i] == '\0')) 
 	  {
-         for (j = i; buf[j] != '\0'; ++j) 
+         for (j = i; bufSendHttp[j] != '\0'; ++j) 
 		 {
             // if jth element of line is not an alphabet,
             // assign the value of (j+1)th element to the jth element
-            buf[j] = buf[j + 1];
+            bufSendHttp[j] = bufSendHttp[j + 1];
          }
-         buf[j] = '\0';
+         bufSendHttp[j] = '\0';
       }
    }
 
-	strcpy(contentPacketToSend,buf);
+	strcpy(contentPacketToSend,bufSendHttp);
 
 	char newConMsg[256];
     sprintf(newConMsg,"GET /chat.php?i=12345678&msg=");
@@ -380,21 +384,12 @@ void sendMsgToHttp()
 	cleanupMsg( internet_socket );
 
 }
-
 /*
-*
-*
-*   END OF CODE TO SEND MESSAGE TO THE HTTP SERVER.
-*
-*
+*	END OF SENDING MESSAGES TO THE HTTP SERVER.
 */
 
 /*
-*
-*
-*   START OF CODE TO RECEIVE MESSAGE TO THE HTTP SERVER.
-*
-*
+*	START OF RECEIVING MESSAGES FROM THE HTTP SERVER WITH PRINTING IT TO CONSOLE.
 */
 int initializationHttpReq()
 {
@@ -470,7 +465,7 @@ void executionHttpReq( int internet_socket )
 	else
 	{
 		buffer[number_of_bytes_received] = '\0';
-		printf( "Received : %s\n\n", buffer );
+		printf( "%s\n\n", buffer );
 	}
 	number_of_bytes_received = recv( internet_socket, buffer, ( sizeof buffer ) - 1, 0 );
 	if( number_of_bytes_received == -1 )
@@ -480,10 +475,8 @@ void executionHttpReq( int internet_socket )
 	else
 	{
 		buffer[number_of_bytes_received] = '\0';
-		printf( "Received : %s\n\n", buffer );
+		printf( "%s\n\n", buffer );
 	}
-	sprintf(latest16Messages,"\n=========== LATEST 16 MESSAGES FROM THE HTTPSERVER ===========\n%s\n==================================\n\n\n",buffer);
-	//printf("\n\n\n%s",latest16Messages);
 }
 
 void cleanupHttpReq( int internet_socket )
@@ -507,20 +500,13 @@ void getHttpReq()
 
 	cleanupHttpReq( internet_socket );
 }
+/*
+*	END OF RECEIVING MESSAGES FROM THE HTTP SERVER WITH PRINTING IT TO CONSOLE.
+*/
+
 
 /*
-*
-*
-*   END OF CODE TO RECEIVE MESSAGE TO THE HTTP SERVER.
-*
-*
-*/
-/*
-*
-*
-*   START OF CODE TO RECEIVE MESSAGE TO THE HTTP SERVER. W/O PRINT
-*
-*
+*	START OF RECEIVING MESSAGES FROM THE HTTP SERVER WITH OUT PRINTING IT TO CONSOLE.
 */
 int initializationHttpReqNoP()
 {
@@ -596,6 +582,7 @@ void executionHttpReqNoP( int internet_socket )
 	else
 	{
 		buffer[number_of_bytes_received] = '\0';
+		sprintf(latest16Messages,"\n=========== LATEST 16 MESSAGES FROM THE HTTPSERVER ===========\n%s\n==================================\n\n\n",buffer);
 	}
 	number_of_bytes_received = recv( internet_socket, buffer, ( sizeof buffer ) - 1, 0 );
 	if( number_of_bytes_received == -1 )
@@ -605,9 +592,8 @@ void executionHttpReqNoP( int internet_socket )
 	else
 	{
 		buffer[number_of_bytes_received] = '\0';
+		//printf( "Received : %s\n\n", buffer );
 	}
-	sprintf(latest16Messages,"\n=========== LATEST 16 MESSAGES FROM THE HTTPSERVER ===========\n%s\n==================================\n",buffer);
-	//printf("\n\n\n%s",latest16Messages);
 }
 
 void cleanupHttpReqNoP( int internet_socket )
@@ -631,11 +617,6 @@ void getHttpReqNoP()
 
 	cleanupHttpReqNoP( internet_socket );
 }
-
 /*
-*
-*
-*   END OF CODE TO RECEIVE MESSAGE TO THE HTTP SERVER. W/O PRINT.
-*
-*
+*	END OF RECEIVING MESSAGES FROM THE HTTP SERVER WITH OUT PRINTING IT TO CONSOLE.
 */
