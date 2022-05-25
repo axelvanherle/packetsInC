@@ -1,1 +1,7 @@
-User chose unlimited packets.
+User chose a set amount of packets to receive.
+User chose the standard timeout of 10 seconds.
+User chose to receive 1 packets.
+
+
+Time between first and last packet: 2.158000 seconds.
+You expected 1 packets, due to timeouts you only received 1 packets. That is a 0.00% loss.
