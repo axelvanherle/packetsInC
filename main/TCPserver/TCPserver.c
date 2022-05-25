@@ -38,6 +38,7 @@
 #define PORT "9034"   // port we're listening on
 
 char buf[256];    // buffer for client data
+int nbytes;		//To save he byetes needed.
 char latest16Messages[1000];    // buffer for client data
 
 //These functions are to send the buf to the HTPP server.
@@ -77,8 +78,6 @@ int main(void)
     int newfd;        // newly accept()ed socket descriptor
     struct sockaddr_storage remoteaddr; // client address
     socklen_t addrlen;
-
-    int nbytes;
 
     char remoteIP[INET6_ADDRSTRLEN];
 
@@ -163,10 +162,7 @@ int main(void)
                     addrlen = sizeof remoteaddr;
                     newfd = accept(listener,(struct sockaddr *)&remoteaddr,&addrlen);
 
-					/*
-					*	HIER MOET DE CODE NAAR DE NIEUWE CLIENT.
-					*/
-					//send(newfd, "BLABLA",6,0);
+					//This gets the latest 16 messages from the HTTP server and forwards it to the new user.
 					getHttpReqNoP();
 					send(newfd, latest16Messages,strlen((latest16Messages)+1), 0);
 
@@ -243,12 +239,7 @@ int main(void)
 									{	
                                         perror("send");
                                     }
-
 									sendMsgToHttp();
-
-									//buf[nbytes] = '\0';
-
-
                                 }
                                 
                             }
@@ -332,6 +323,7 @@ int initializationMsg()
 
 void executionMsg( int internet_socket )
 {	
+	buf[nbytes] = '\0';
 	int lenghtOfContentPacketToSend;
 	char contentPacketToSend[256]; 
 
@@ -354,7 +346,6 @@ void executionMsg( int internet_socket )
 	strcpy(contentPacketToSend,buf);
 
 	char newConMsg[256];
-	memset(newConMsg,0,strlen(newConMsg));
     sprintf(newConMsg,"GET /chat.php?i=12345678&msg=");
     strcat(newConMsg, contentPacketToSend);
     strcat(newConMsg," HTTP/1.0\r\nHost: student.pxl-ea-ict.be\r\n\r\n");
