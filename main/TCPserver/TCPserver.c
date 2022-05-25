@@ -64,8 +64,7 @@ void *get_in_addr(struct sockaddr *sa);
 int main(void)
 {
 	OSInit();
-	strcpy(buf,"Test");
-	sendMsgToHttp();
+
 	//Gets latest 16 messages.
 	getHttpReq();
 	printf("Server is now waiting for incomming connections.\n");
@@ -408,6 +407,7 @@ void sendMsgToHttp()
 */
 int initializationHttpReq()
 {
+	//Step 1.1
 	struct addrinfo internet_address_setup;
 	struct addrinfo * internet_address_result;
 	memset( &internet_address_setup, 0, sizeof internet_address_setup );
@@ -424,6 +424,7 @@ int initializationHttpReq()
 	struct addrinfo * internet_address_result_iterator = internet_address_result;
 	while( internet_address_result_iterator != NULL )
 	{
+		//Step 1.2
 		internet_socket = socket( internet_address_result_iterator->ai_family, internet_address_result_iterator->ai_socktype, internet_address_result_iterator->ai_protocol );
 		if( internet_socket == -1 )
 		{
@@ -431,6 +432,7 @@ int initializationHttpReq()
 		}
 		else
 		{
+			//Step 1.3
 			int connect_return = connect( internet_socket, internet_address_result_iterator->ai_addr, internet_address_result_iterator->ai_addrlen );
 			if( connect_return == -1 )
 			{
@@ -458,7 +460,7 @@ int initializationHttpReq()
 
 void executionHttpReq( int internet_socket )
 {	
-	printf("\n=========== LATEST 16 MESSAGES FROM THE HTTPSERVER ===========\n");
+	//Step 2.1
 	int number_of_bytes_send = 0;
 	number_of_bytes_send = send( internet_socket, "GET /history.php?i=12345678 HTTP/1.0\r\nHost: student.pxl-ea-ict.be\r\n\r\n", 77, 0 );
 	if( number_of_bytes_send == -1 )
@@ -466,19 +468,29 @@ void executionHttpReq( int internet_socket )
 		perror( "send" );
 	}
 
+	//Step 2.2
 	int number_of_bytes_received = 0;
 	char buffer[1000];
-	number_of_bytes_received = recv( internet_socket, buffer, 10000, 0 );
+	number_of_bytes_received = recv( internet_socket, buffer, ( sizeof buffer ) - 1, 0 );
 	if( number_of_bytes_received == -1 )
 	{
 		perror( "recv" );
 	}
 	else
-	{	
-		printf( "%s\n\n", buffer );
+	{
+		buffer[number_of_bytes_received] = '\0';
+		printf( "Received : %s\n", buffer );
 	}
-	printf("\n==================================\n");
-
+	number_of_bytes_received = recv( internet_socket, buffer, ( sizeof buffer ) - 1, 0 );
+	if( number_of_bytes_received == -1 )
+	{
+		perror( "recv" );
+	}
+	else
+	{
+		buffer[number_of_bytes_received] = '\0';
+		printf( "Received : %s\n", buffer );
+	}
 	sprintf(latest16Messages,"\n=========== LATEST 16 MESSAGES FROM THE HTTPSERVER ===========\n%s\n==================================\n",buffer);
 	//printf("\n\n\n%s",latest16Messages);
 }
@@ -521,6 +533,7 @@ void getHttpReq()
 */
 int initializationHttpReqNoP()
 {
+	//Step 1.1
 	struct addrinfo internet_address_setup;
 	struct addrinfo * internet_address_result;
 	memset( &internet_address_setup, 0, sizeof internet_address_setup );
@@ -537,6 +550,7 @@ int initializationHttpReqNoP()
 	struct addrinfo * internet_address_result_iterator = internet_address_result;
 	while( internet_address_result_iterator != NULL )
 	{
+		//Step 1.2
 		internet_socket = socket( internet_address_result_iterator->ai_family, internet_address_result_iterator->ai_socktype, internet_address_result_iterator->ai_protocol );
 		if( internet_socket == -1 )
 		{
@@ -544,6 +558,7 @@ int initializationHttpReqNoP()
 		}
 		else
 		{
+			//Step 1.3
 			int connect_return = connect( internet_socket, internet_address_result_iterator->ai_addr, internet_address_result_iterator->ai_addrlen );
 			if( connect_return == -1 )
 			{
@@ -571,6 +586,7 @@ int initializationHttpReqNoP()
 
 void executionHttpReqNoP( int internet_socket )
 {	
+	//Step 2.1
 	int number_of_bytes_send = 0;
 	number_of_bytes_send = send( internet_socket, "GET /history.php?i=12345678 HTTP/1.0\r\nHost: student.pxl-ea-ict.be\r\n\r\n", 77, 0 );
 	if( number_of_bytes_send == -1 )
@@ -578,17 +594,29 @@ void executionHttpReqNoP( int internet_socket )
 		perror( "send" );
 	}
 
+	//Step 2.2
 	int number_of_bytes_received = 0;
 	char buffer[1000];
-	number_of_bytes_received = recv( internet_socket, buffer, 10000, 0 );
+	number_of_bytes_received = recv( internet_socket, buffer, ( sizeof buffer ) - 1, 0 );
 	if( number_of_bytes_received == -1 )
 	{
 		perror( "recv" );
 	}
 	else
-	{	
-		sprintf(latest16Messages,"\n=========== LATEST 16 MESSAGES FROM THE HTTPSERVER ===========\n%s\n==================================\n",buffer);
+	{
+		buffer[number_of_bytes_received] = '\0';
 	}
+	number_of_bytes_received = recv( internet_socket, buffer, ( sizeof buffer ) - 1, 0 );
+	if( number_of_bytes_received == -1 )
+	{
+		perror( "recv" );
+	}
+	else
+	{
+		buffer[number_of_bytes_received] = '\0';
+	}
+	sprintf(latest16Messages,"\n=========== LATEST 16 MESSAGES FROM THE HTTPSERVER ===========\n%s\n==================================\n",buffer);
+	//printf("\n\n\n%s",latest16Messages);
 }
 
 void cleanupHttpReqNoP( int internet_socket )
