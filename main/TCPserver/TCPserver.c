@@ -35,25 +35,28 @@
 	void OSInit( void ) {}
 	void OSCleanup( void ) {}
 #endif
+
+// Whats code efficiency? We don't do that here.
+
 #define PORT "9034"   // port we're listening on
 
-char buf[256];    // buffer for client data
-int nbytes;		//To save he byetes needed.
-char latest16Messages[1000];    // buffer for client data
+char buf[256];    // This variable saves the client message.
+int nbytes;		// This variable saves the amound of chars that are in the client message.
+char latest16Messages[1000];    //This variable is used to store the latest 16 messages pulled from the HTTP server.
 
-//These functions are to send the buf to the HTPP server.
+//These functions are to send whats in "buf" to the HTPP server.
 int initializationMsg();
 void executionMsg( int );
 void cleanupMsg( int );
 void sendMsgToHttp();
 
-//These functions get the latest 16 messages on the HTPP server.
+//These functions get the latest 16 messages on the HTPP server and print them to console. Used in the beginning of the code only, once the server launches its first start.
 int initializationHttpReq();
 void executionHttpReq( int );
 void cleanupHttpReq( int );
 void getHttpReq();
 
-//These functions get the latest 16 messages on the HTPP server.
+//These functions get the latest 16 messages on the HTPP server. And store them in "latest16messages" to forward them to a newly connected client.
 int initializationHttpReqNoP();
 void executionHttpReqNoP( int );
 void cleanupHttpReqNoP( int );
@@ -66,7 +69,7 @@ int main(void)
 {
 	OSInit();
 
-	//Gets latest 16 messages.
+	//Gets latest 16 messages fromt he HTTP server.
 	getHttpReq();
 	printf("\n\n\nThose are the latest 16 messages saved on the HTTP server.\n");
 	printf("Server is now waiting for incomming connections.\n");
@@ -180,7 +183,7 @@ int main(void)
                         }
                         printf("SERVER MESSAGE: new connection from %s on ""socket %d\n",inet_ntop(remoteaddr.ss_family,get_in_addr((struct sockaddr*)&remoteaddr),remoteIP, INET6_ADDRSTRLEN),newfd);
 
-						//Sends that a new client got connected to everyone.
+						//This code sends the IP and Socket from a newly connected client to all currently connected clients.
                         char newConMsg[256];
                         sprintf(newConMsg,"\nNew connection from ");
                         strcat(newConMsg, inet_ntop(remoteaddr.ss_family,get_in_addr((struct sockaddr*)&remoteaddr),remoteIP, INET6_ADDRSTRLEN));
@@ -198,6 +201,7 @@ int main(void)
                                 // except the listener and ourselves
                                 if (j != listener && j != i) 
 								{	
+									//Sends the string that was just crafted to all currently connected clients.
                                     if (send(j, newConMsg,strlen(newConMsg), 0) == -1) 
 									{	
                                         perror("send");
@@ -227,8 +231,11 @@ int main(void)
                     } 
 					else 
 					{	
-						
-                        // we got some data from a client
+                        /*
+						*	WAKE UP! We just got some data from a client. Let's do this shit.
+						*/
+
+						//Sends the message to the HTTP server. (Also manipulates the string, no fucking clue if this is needed but i dont want to spend more time on it).
 						sendMsgToHttp();
 						
                         for(j = 0; j <= fdmax; j++) 
@@ -238,7 +245,8 @@ int main(void)
 							{   
                                 // except the listener and ourselves
                                 if (j != listener && j != i) 
-								{
+								{	
+									//This sends the client message to everyone. (Except for the listener and ourselves).
                                     if (send(j, buf, nbytes, 0) == -1) 
 									{	
                                         perror("send");
@@ -252,10 +260,13 @@ int main(void)
             } // END got new incoming connection
         } // END looping through file descriptors
     } // END for(;;)--and you thought it would never end!
+
     OSCleanup();
+
     return 0;
 }
 
+//This function gets sockaddr, IPv4 or IPv6.
 void *get_in_addr(struct sockaddr *sa)
 {
     if (sa->sa_family == AF_INET) 
@@ -268,7 +279,13 @@ void *get_in_addr(struct sockaddr *sa)
 
 /*
 *	START OF SENDING MESSAGES TO THE HTTP SERVER.
+*
+*	This is just a regular TCP client.
+*	Gets whatever is in buf, do some string manipulation then send it to the HTTP server.
+*	More detail in the code itself.
 */
+
+//Gets a socket and returns it.
 int initializationMsg()
 {
 	struct addrinfo internet_address_setup;
@@ -321,42 +338,55 @@ int initializationMsg()
 
 void executionMsg( int internet_socket )
 {	
+	//We're gonna be using this to send buf to the HTTP server.
+	char contentPacketToSend[256];
+
+	//Adds a NUL terminator to the end of the string, if this isnt done there is overflow.
 	buf[nbytes] = '\0';
-	char contentPacketToSend[256]; 
 
-	for (int i = 0, j; buf[i] != '\0'; ++i) 
-	{
-      // enter the loop if the character is not an alphabet
-      // and not the null character
-      while (!(buf[i] >= 'a' && buf[i] <= 'z') && !(buf[i] >= 'A' && buf[i] <= 'Z') && !(buf[i] == '\0')) 
-	  {
-         for (j = i; buf[j] != '\0'; ++j) 
-		 {
-            // if jth element of line is not an alphabet,
-            // assign the value of (j+1)th element to the jth element
-            buf[j] = buf[j + 1];
-         }
-         buf[j] = '\0';
-      }
-   }
-
+	//Saves buf into "contentPacketToSend", we can also just manipulate "buf" but since this fucntion is called before we send the message any changes done here
+	//will also be send to the new client. We can ignore this and just manipulate "buf" if we are very lazy and don't care, but i did care.
 	strcpy(contentPacketToSend,buf);
 
+	//This for loop filters everything out of the string
+	//(a-Z ; 1-9 can stay. Fuck the rest.)
+	for (int i = 0, j; buf[i] != '\0'; ++i) 
+	{
+      // Enter the loop if the character is not an alphabet.
+      // And if it isnt a NUL terminator.
+      while (!(contentPacketToSend[i] >= 'a' && contentPacketToSend[i] <= 'z') && !(contentPacketToSend[i] >= 'A' && contentPacketToSend[i] <= 'Z') && !(contentPacketToSend[i] == '\0')) 
+	  {
+         for (j = i; contentPacketToSend[j] != '\0'; ++j) 
+		 {
+            // If jth element of line is not an alphabet, assign the value of (j+1)th element to the jth element.
+            contentPacketToSend[j] = contentPacketToSend[j + 1];
+         }
+         contentPacketToSend[j] = '\0';
+      }
+   	}
+
+	//This code crafts the HTTP get request. We could also do this with "contentPacketToSend" if we want to be memmory efficient, but i again dont care.
 	char newConMsg[256];
     sprintf(newConMsg,"GET /chat.php?i=12345678&msg=");
     strcat(newConMsg, contentPacketToSend);
     strcat(newConMsg," HTTP/1.0\r\nHost: student.pxl-ea-ict.be\r\n\r\n");
 
+	//You've got mail!
 	int number_of_bytes_send = 0;
 	number_of_bytes_send = send( internet_socket, newConMsg, 200, 0 );
 	if( number_of_bytes_send == -1 )
 	{
 		perror( "send" );
 	}
+
+	/*
+	* 	:O Where is my recv?
+	*/
 }
 
+//Does cleanup.
 void cleanupMsg( int internet_socket )
-{
+{	
 	//Step 3.2
 	int shutdown_return = shutdown( internet_socket, SD_SEND );
 	if( shutdown_return == -1 )
@@ -368,6 +398,7 @@ void cleanupMsg( int internet_socket )
 	close( internet_socket );
 }
 
+//This is the actual client, aka call this when you want to send buf to the HTTP server.
 void sendMsgToHttp()
 {
 	int internet_socket = initializationMsg();
@@ -377,13 +408,16 @@ void sendMsgToHttp()
 	cleanupMsg( internet_socket );
 
 }
-/*
-*	END OF SENDING MESSAGES TO THE HTTP SERVER.
-*/
 
 /*
-*	START OF RECEIVING MESSAGES FROM THE HTTP SERVER WITH PRINTING IT TO CONSOLE.
+*	START OF RECIVING MESSAGES TO THE HTTP SERVER.
+*	*WITH PRINTING IT TO CONSOLE*
+*
+*	This is just a regular TCP client.
+*	Sends a HTTP request and gets the latest 16 messages sent to console, then promtly prints it to the console.
 */
+
+//Gets a socket and returns it.
 int initializationHttpReq()
 {
 	//Step 1.1
@@ -439,7 +473,7 @@ int initializationHttpReq()
 
 void executionHttpReq( int internet_socket )
 {	
-	//Step 2.1
+	//Sends a HTTP request for the latest 16 messages aka history.
 	int number_of_bytes_send = 0;
 	number_of_bytes_send = send( internet_socket, "GET /history.php?i=12345678 HTTP/1.0\r\nHost: student.pxl-ea-ict.be\r\n\r\n", 77, 0 );
 	if( number_of_bytes_send == -1 )
@@ -447,7 +481,11 @@ void executionHttpReq( int internet_socket )
 		perror( "send" );
 	}
 
-	//Step 2.2
+	/*
+	*	This recveives the latest 16 messages and prints it to console.
+	*	"But why 2 recv?" - Sometimes the server sends the information in two packets.
+	*	recv isnt blocking, so i dont care and i can do this.
+	*/
 	int number_of_bytes_received = 0;
 	char buffer[1000];
 	number_of_bytes_received = recv( internet_socket, buffer, ( sizeof buffer ) - 1, 0 );
@@ -470,8 +508,11 @@ void executionHttpReq( int internet_socket )
 		buffer[number_of_bytes_received] = '\0';
 		printf( "%s\n\n", buffer );
 	}
+
+	//All done? That was fast.
 }
 
+//Does cleanu.
 void cleanupHttpReq( int internet_socket )
 {
 	//Step 3.2
@@ -485,6 +526,7 @@ void cleanupHttpReq( int internet_socket )
 	close( internet_socket );
 }
 
+//Call this fucntion when you want to get the latest 16 messages and print it to console.
 void getHttpReq()
 {
 	int internet_socket = initializationHttpReq();
@@ -493,14 +535,23 @@ void getHttpReq()
 
 	cleanupHttpReq( internet_socket );
 }
-/*
-*	END OF RECEIVING MESSAGES FROM THE HTTP SERVER WITH PRINTING IT TO CONSOLE.
-*/
-
 
 /*
-*	START OF RECEIVING MESSAGES FROM THE HTTP SERVER WITH OUT PRINTING IT TO CONSOLE.
+*	START OF RECIVING MESSAGES TO THE HTTP SERVER.
+*	*WITHOUT PRINTING IT TO CONSOLE*
+*
+*	This is just a regular TCP client.
+*	Sends a HTTP request and gets the latest 16 messages, then promtly saves it into "latest16Messages".
+*
+*	"But why do i need another client to retreive the latest 16 messages?" - Well, because i'm lazy.
+*	But really, it is because i'm lazy. This could be done in one client, but i didnt.
+*	This gets the latest 16 messages and saves it, without printing.
+*	The other client that gets the messages and prints it to console, but when sending them to a new client i dont want to print it everytime, hence this client.
 */
+
+//BTW, NoP stands for No Print.
+
+//Gets us a socket, you should know this by now.
 int initializationHttpReqNoP()
 {
 	//Step 1.1
@@ -554,6 +605,7 @@ int initializationHttpReqNoP()
 	return internet_socket;
 }
 
+//Gets latest 16 messages and saves it into "latest16Messages".
 void executionHttpReqNoP( int internet_socket )
 {	
 	//Step 2.1
@@ -564,31 +616,35 @@ void executionHttpReqNoP( int internet_socket )
 		perror( "send" );
 	}
 
-	//Step 2.2
 	int number_of_bytes_received = 0;
 	char buffer[1000];
+
 	number_of_bytes_received = recv( internet_socket, buffer, ( sizeof buffer ) - 1, 0 );
 	if( number_of_bytes_received == -1 )
 	{
 		perror( "recv" );
 	}
 	else
-	{
+	{	
+		//We got some usefull data!
+		//Gets buffer and saves it into (should i really name the var again?).
+		//Also adds some syntax, because why not.
 		buffer[number_of_bytes_received] = '\0';
 		sprintf(latest16Messages,"\n=========== LATEST 16 MESSAGES FROM THE HTTPSERVER ===========\n%s\n==================================\n\n\n",buffer);
 	}
+	//Another recv, this one does nothing but i don't want to delete is.
 	number_of_bytes_received = recv( internet_socket, buffer, ( sizeof buffer ) - 1, 0 );
 	if( number_of_bytes_received == -1 )
 	{
 		perror( "recv" );
 	}
 	else
-	{
+	{	
 		buffer[number_of_bytes_received] = '\0';
-		//printf( "Received : %s\n\n", buffer );
 	}
 }
 
+//Bla bla you know what this does.
 void cleanupHttpReqNoP( int internet_socket )
 {
 	//Step 3.2
@@ -602,6 +658,7 @@ void cleanupHttpReqNoP( int internet_socket )
 	close( internet_socket );
 }
 
+//Use this function to save the latest 16 messages into "latest16Messages".
 void getHttpReqNoP()
 {
 	int internet_socket = initializationHttpReqNoP();
@@ -610,6 +667,13 @@ void getHttpReqNoP()
 
 	cleanupHttpReqNoP( internet_socket );
 }
+
 /*
-*	END OF RECEIVING MESSAGES FROM THE HTTP SERVER WITH OUT PRINTING IT TO CONSOLE.
+*	That was is, why are you reading me? There clearly isnt code under me.
+*	
+*	
+*	Really? I just told you there was no code left.
+*	
+*	
+*	Coded by axel vanhere using stolen code written by bart and beej.
 */
