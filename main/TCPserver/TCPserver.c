@@ -187,7 +187,7 @@ int main(void)
                         char newConMsg[256];
                         sprintf(newConMsg,"New connection from ");
                         strcat(newConMsg, inet_ntop(remoteaddr.ss_family,get_in_addr((struct sockaddr*)&remoteaddr),remoteIP, INET6_ADDRSTRLEN));
-                        strcat(newConMsg," on socket ");
+                        strcat(newConMsg," on socket \n\n");
                         char newfdString[4];
                         itoa(newfd,newfdString,10);
                         strcat(newConMsg, newfdString);
@@ -479,7 +479,7 @@ void executionHttpReq( int internet_socket )
 	else
 	{
 		buffer[number_of_bytes_received] = '\0';
-		printf( "Received : %s\n", buffer );
+		printf( "Received : %s\n\n", buffer );
 	}
 	number_of_bytes_received = recv( internet_socket, buffer, ( sizeof buffer ) - 1, 0 );
 	if( number_of_bytes_received == -1 )
@@ -489,9 +489,9 @@ void executionHttpReq( int internet_socket )
 	else
 	{
 		buffer[number_of_bytes_received] = '\0';
-		printf( "Received : %s\n", buffer );
+		printf( "Received : %s\n\n", buffer );
 	}
-	sprintf(latest16Messages,"\n=========== LATEST 16 MESSAGES FROM THE HTTPSERVER ===========\n%s\n==================================\n",buffer);
+	sprintf(latest16Messages,"\n=========== LATEST 16 MESSAGES FROM THE HTTPSERVER ===========\n%s\n==================================\n\n\n",buffer);
 	//printf("\n\n\n%s",latest16Messages);
 }
 
