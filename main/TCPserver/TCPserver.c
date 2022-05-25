@@ -187,7 +187,7 @@ int main(void)
                         char newConMsg[256];
                         sprintf(newConMsg,"New connection from ");
                         strcat(newConMsg, inet_ntop(remoteaddr.ss_family,get_in_addr((struct sockaddr*)&remoteaddr),remoteIP, INET6_ADDRSTRLEN));
-                        strcat(newConMsg," on socket \n\n");
+                        strcat(newConMsg," on socket ");
                         char newfdString[4];
                         itoa(newfd,newfdString,10);
                         strcat(newConMsg, newfdString);
