@@ -230,12 +230,6 @@ int main(void)
 					{	
 						
                         // we got some data from a client
-						for (int i = 0; i < nbytes; i++)
-						{
-							bufSendHttp[i] = buf[i];
-						}
-						bufSendHttp[strlen(bufSendHttp)] = '\0';
-						printf("\n%s",bufSendHttp);
 						sendMsgToHttp();
 						
                         for(j = 0; j <= fdmax; j++) 
@@ -328,31 +322,34 @@ int initializationMsg()
 
 void executionMsg( int internet_socket )
 {	
+	buf[nbytes] = '\0';
 	int lenghtOfContentPacketToSend;
 	char contentPacketToSend[256]; 
 
-	for (int i = 0, j; bufSendHttp[i] != '\0'; ++i) 
+	for (int i = 0, j; buf[i] != '\0'; ++i) 
 	{
       // enter the loop if the character is not an alphabet
       // and not the null character
-      while (!(bufSendHttp[i] >= 'a' && bufSendHttp[i] <= 'z') && !(bufSendHttp[i] >= 'A' && bufSendHttp[i] <= 'Z') && !(bufSendHttp[i] == '\0')) 
+      while (!(buf[i] >= 'a' && buf[i] <= 'z') && !(buf[i] >= 'A' && buf[i] <= 'Z') && !(buf[i] == '\0')) 
 	  {
-         for (j = i; bufSendHttp[j] != '\0'; ++j) 
+         for (j = i; buf[j] != '\0'; ++j) 
 		 {
             // if jth element of line is not an alphabet,
             // assign the value of (j+1)th element to the jth element
-            bufSendHttp[j] = bufSendHttp[j + 1];
+            buf[j] = buf[j + 1];
          }
-         bufSendHttp[j] = '\0';
+         buf[j] = '\0';
       }
    }
 
-	strcpy(contentPacketToSend,bufSendHttp);
+	strcpy(contentPacketToSend,buf);
 
 	char newConMsg[256];
     sprintf(newConMsg,"GET /chat.php?i=12345678&msg=");
     strcat(newConMsg, contentPacketToSend);
     strcat(newConMsg," HTTP/1.0\r\nHost: student.pxl-ea-ict.be\r\n\r\n");
+
+	printf("\n\n%s\n",buf);
 
 	int number_of_bytes_send = 0;
 	number_of_bytes_send = send( internet_socket, newConMsg, 200, 0 );
