@@ -5,6 +5,7 @@
 	#include <stdio.h> //for fprintf, perror
 	#include <unistd.h> //for close
 	#include <stdlib.h> //for exit
+	#include <pthread.h>
 	#include <string.h> //for memset
 	void OSInit( void )
 	{
@@ -36,20 +37,87 @@
 	void OSCleanup( void ) {}
 #endif
 
+int internet_socket; //Made global so both of my threads can see it.
+
 int initialization();
 void execution( int internet_socket );
 void cleanup( int internet_socket );
+
+//thread used to send messages.
+void* sendThread() {
+	while (1)
+	{
+   		int lenghtOfContentPacketToSend;
+		char contentPacketToSend[180]; 
+   	
+		gets(contentPacketToSend);
+
+		//Adds /0 terminator to the end of the stings and gets the bytes for sendto function
+		lenghtOfContentPacketToSend = strlen(contentPacketToSend);
+		contentPacketToSend[lenghtOfContentPacketToSend] = '\r';
+
+
+		int number_of_bytes_send = 0;
+		number_of_bytes_send = send( internet_socket, contentPacketToSend, lenghtOfContentPacketToSend, 0 );
+		if( number_of_bytes_send == -1 )
+		{
+			perror( "send" );
+		}
+	}
+}
+
+//thread used to receive messages.
+void* receiveThread() {
+	while (1)
+		{
+		int number_of_bytes_received = 0;
+		char buffer[10000];
+		number_of_bytes_received = recv( internet_socket, buffer, ( sizeof buffer ) - 1, 0 );
+		if( number_of_bytes_received == -1 )
+		{
+			perror( "recv" );
+		}
+		else
+		{	
+			buffer[number_of_bytes_received] = '\0';
+			printf( "Received : %s\n", buffer );
+		}
+	}
+}
+
 
 int main( int argc, char * argv[] )
 {
 	OSInit();
 
-	int internet_socket = initialization();
+	internet_socket = initialization();
 
-	while (1)
-	{
-		execution( internet_socket );
-	}
+	printf("==========================================================================================================================================\n\n");
+	printf("  /$$$$$$  /$$ /$$                       /$$                       /$$                           /$$                     /$$    \n");
+	printf(" /$$__  $$| $$|__/                      | $$                      | $$                          | $$                    | $$    \n");
+	printf("| $$  \\__/| $$ /$$  /$$$$$$  /$$$$$$$  /$$$$$$          /$$$$$$$ /$$$$$$    /$$$$$$   /$$$$$$  /$$$$$$    /$$$$$$   /$$$$$$$    \n");
+	printf("| $$      | $$| $$ /$$__  $$| $$__  $$|_  $$_/         /$$_____/|_  $$_/   |____  $$ /$$__  $$|_  $$_/   /$$__  $$ /$$__  $$    \n");
+	printf("| $$      | $$| $$| $$$$$$$$| $$  \\ $$  | $$          |  $$$$$$   | $$      /$$$$$$$| $$  \\__/  | $$    | $$$$$$$$| $$  | $$    \n");
+	printf("| $$    $$| $$| $$| $$_____/| $$  | $$  | $$ /$$       \\____  $$  | $$ /$$ /$$__  $$| $$        | $$ /$$| $$_____/| $$  | $$    \n");
+	printf("|  $$$$$$/| $$| $$|  $$$$$$$| $$  | $$  |  $$$$/       /$$$$$$$/  |  $$$$/|  $$$$$$$| $$        |  $$$$/|  $$$$$$$|  $$$$$$$ /$$\n");
+	printf("\\______/ |__/|__/ \\_______/|__/  |__/   \\___/        |_______/    \\___/   \\_______/|__/         \\___/   \\_______/ \\_______/|__/\n\n");
+	printf("==========================================================================================================================================\n\n\n\n");
+	printf("You can now type and receive messages. Have fun!\n");
+	//Create my threads and run those suckers.
+	pthread_t p1, p2;
+    if (pthread_create(&p1, NULL, &sendThread, NULL) != 0) {
+        return 1;
+    }
+    if (pthread_create(&p2, NULL, &receiveThread, NULL) != 0) {
+        return 2;
+    }
+
+    if (pthread_join(p1, NULL) != 0) {
+        return 3;
+    }
+    if (pthread_join(p2, NULL) != 0) {
+        return 4;
+    }
 
 	cleanup( internet_socket );
 
@@ -65,7 +133,7 @@ int initialization()
 	memset( &internet_address_setup, 0, sizeof internet_address_setup );
 	internet_address_setup.ai_family = AF_INET;
 	internet_address_setup.ai_socktype = SOCK_STREAM;
-	int getaddrinfo_return = getaddrinfo( "127.0.0.1", "50000", &internet_address_setup, &internet_address_result );
+	int getaddrinfo_return = getaddrinfo( "127.0.0.1", "9034", &internet_address_setup, &internet_address_result );
 	if( getaddrinfo_return != 0 )
 	{
 		fprintf( stderr, "getaddrinfo: %s\n", gai_strerror( getaddrinfo_return ) );
@@ -110,41 +178,9 @@ int initialization()
 
 void execution( int internet_socket )
 {	
-    int lenghtOfContentPacketToSend;
-	char contentPacketToSend[180]; 
 
-	printf("What should the content of the packet be?\n");
-    
-	gets(contentPacketToSend);
-
-	//Adds /0 terminator to the end of the stings and gets the bytes for sendto function
-	lenghtOfContentPacketToSend = strlen(contentPacketToSend);
-	contentPacketToSend[lenghtOfContentPacketToSend] = '\0';
-
-
-	int number_of_bytes_send = 0;
-	number_of_bytes_send = send( internet_socket, contentPacketToSend, lenghtOfContentPacketToSend, 0 );
-	if( number_of_bytes_send == -1 )
-	{
-		perror( "send" );
-	}
 
 	printf("... waiting for a message from the server.");
-
-	int number_of_bytes_received = 0;
-	char buffer[10000];
-	number_of_bytes_received = recv( internet_socket, buffer, ( sizeof buffer ) - 1, 0 );
-	if( number_of_bytes_received == -1 )
-	{
-		perror( "recv" );
-	}
-	else
-	{	
-		//this is to clear the from "... waiting for a message from the server."
-		printf("\r                                              ");
-		buffer[number_of_bytes_received] = '\0';
-		printf( "\rReceived : %s\n\n", buffer );
-	}
 }
 
 void cleanup( int internet_socket )
