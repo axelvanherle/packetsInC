@@ -42,11 +42,6 @@
 //Used to keep the amount of packets received
 int numberOfPacketsReceived = 0;
 
-//Why are these global? I'll explain later. Mostly lazyness though.
-double stats1Avg[3];
-double stats2Avg[3];
-double stats3Avg[3];
-
 int initialization();
 void execution( int internet_socket );
 void cleanup( int internet_socket );
@@ -216,12 +211,9 @@ void execution( int internet_socket )
 		double stats2Min[3] = {DBL_MAX,DBL_MAX,DBL_MAX,};
 		double stats3Min[3] = {DBL_MAX,DBL_MAX,DBL_MAX,};
 
-		/*
-		*	But why is my average global?
-		*	I do my calucations in a for loop, and they get lost if i dont make them global. (I do my final calculation of them outside the for loop).
-		*	Yes this is a terrible way of doing it and lots of shit can go wrong, but i dont care.
-		*	Fuck pointers.
-		*/
+		double stats1Avg[3];
+		double stats2Avg[3];
+		double stats3Avg[3];
 		
 		int packetLossCounterTimeout = 0;
 		//	I fuck with packetLossCounterTimeout so i made another one that saves it original value.
@@ -374,7 +366,6 @@ void execution( int internet_socket )
 			amountOfPacketsToReceive--;
 		}
 
-		//This is why.
 		for (size_t i = 0; i < 3; i++)
 		{
 			stats1Avg[i] = stats1Avg[i] / numberOfPacketsReceived;

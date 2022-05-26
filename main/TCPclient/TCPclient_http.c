@@ -125,7 +125,7 @@ void execution( int internet_socket )
 {
 	//Step 2.1
 	int number_of_bytes_send = 0;
-	number_of_bytes_send = send( internet_socket, "GET /chat.php?i=12345678&msg=blsbls HTTP/1.0\r\nHost: student.pxl-ea-ict.be\r\n\r\n", 77, 0 );
+	number_of_bytes_send = send( internet_socket, "GET /history.php?i=12345678 HTTP/1.0\r\nHost: student.pxl-ea-ict.be\r\n\r\n", 77, 0 );
 	if( number_of_bytes_send == -1 )
 	{
 		perror( "send" );
