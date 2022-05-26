@@ -7,6 +7,7 @@
 	#include <stdlib.h> //for exit
 	#include <string.h> //for memset
 	#include <time.h> //for clock
+	#include <float.h>
 	void OSInit( void )
 	{
 		WSADATA wsaData;
@@ -39,6 +40,11 @@
 #endif
 
 int numberOfPacketsReceived = 0;
+
+//Why are these global? I'll explain later. Mostly lazyness though.
+double stats1Avg[3];
+double stats2Avg[3];
+double stats3Avg[3];
 
 int initialization();
 void execution( int internet_socket );
@@ -170,15 +176,13 @@ void execution( int internet_socket )
 		double stats2[3];
 		double stats3[3];
 
-		double stats1Max[3];
-		double stats2Max[3];
-		double stats3Max[3];
-		double stats1Min[3];
-		double stats2Min[3];
-		double stats3Min[3];
-		double stats1Avg[3];
-		double stats2Avg[3];
-		double stats3Avg[3];
+		double stats1Max[3] = {-DBL_MAX,-DBL_MAX,-DBL_MAX,};
+		double stats2Max[3] = {-DBL_MAX,-DBL_MAX,-DBL_MAX,};
+		double stats3Max[3] = {-DBL_MAX,-DBL_MAX,-DBL_MAX,};
+
+		double stats1Min[3] = {DBL_MAX,DBL_MAX,DBL_MAX,};
+		double stats2Min[3] = {DBL_MAX,DBL_MAX,DBL_MAX,};
+		double stats3Min[3] = {DBL_MAX,DBL_MAX,DBL_MAX,};
 
 		int packetLossCounterTimeout = 0;
 		int packetLossCounterTimeoutPrint = 0;
@@ -245,6 +249,75 @@ void execution( int internet_socket )
 				fprintf(OUTPUTFILE,"Packet [ %d ]: %s\n",amountOfPacketsToReceive, buffer);
 
 				sscanf(buffer, "%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf",&trash,&trash,&stats1[0],&stats1[1],&stats1[2],&trash,&stats2[0],&stats2[1],&stats2[2],&trash,&stats3[0],&stats3[1],&stats3[2]);
+
+				//Gets the max for stats1-3.
+				for (size_t i = 0; i < 3; i++)
+				{
+					if (stats1[i] > stats1Max[i])
+					{
+						stats1Max[i] = stats1[i];
+					}
+					else
+					{
+						//Do nothing.
+					}
+
+					if (stats2[i] > stats2Max[i])
+					{
+						stats2Max[i] = stats2[i];
+					}
+					else
+					{
+						//Do nothing.
+					}
+
+					if (stats3[i] > stats3Max[i])
+					{
+						stats3Max[i] = stats3[i];
+					}
+					else
+					{
+						//Do nothing.
+					}
+				}
+
+				//Gets the min for stats1-3.
+				for (size_t i = 0; i < 3; i++)
+				{
+					if (stats1[i] < stats1Min[i])
+					{
+						stats1Min[i] = stats1[i];
+					}
+					else
+					{
+						//Do nothing.
+					}
+
+					if (stats2[i] < stats2Min[i])
+					{
+						stats2Min[i] = stats2[i];
+					}
+					else
+					{
+						//Do nothing.
+					}
+					
+					if (stats3[i] < stats3Min[i])
+					{
+						stats3Min[i] = stats3[i];
+					}
+					else
+					{
+						//Do nothing.
+					}
+				}
+
+				for (size_t i = 0; i < 3; i++)
+				{
+					stats1Avg[i] = stats1Avg[i] + stats1[i];
+					stats2Avg[i] = stats2Avg[i] + stats2[i];
+					stats3Avg[i] = stats3Avg[i] + stats3[i];
+				}
 			}
 
 			int number_of_bytes_send = 0;
@@ -255,6 +328,13 @@ void execution( int internet_socket )
 			}
 
 			amountOfPacketsToReceive--;
+		}
+
+		for (size_t i = 0; i < 3; i++)
+		{
+			stats1Avg[i] = stats1Avg[i] / numberOfPacketsReceived;
+			stats2Avg[i] = stats2Avg[i] / numberOfPacketsReceived;
+			stats3Avg[i] = stats3Avg[i] / numberOfPacketsReceived;
 		}
 
 		clock_t end = clock();
@@ -281,6 +361,22 @@ void execution( int internet_socket )
 		for (int i = 0; i < 3; i++)
 		{
 			printf("%lf\n",stats3[i]);
+		}
+
+		printf("\nMAX STATS");
+		for (int i = 0; i < 3; i++)		
+		{
+			printf("%lf\n",stats1Max[i]);
+		}
+		printf("\nMIN STATS");
+		for (int i = 0; i < 3; i++)		
+		{
+			printf("%lf\n",stats1Min[i]);
+		}
+		printf("\nAVG STATS");
+		for (int i = 0; i < 3; i++)		
+		{
+			printf("%lf\n",stats1Avg[i]);
 		}
 	}
 

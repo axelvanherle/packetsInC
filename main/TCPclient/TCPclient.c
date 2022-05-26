@@ -141,7 +141,7 @@ void execution( int internet_socket )
 	else
 	{	
 		//this is to clear the from "... waiting for a message from the server."
-		printf( "\r                                          ", buffer );
+		printf("\r                                              ");
 		buffer[number_of_bytes_received] = '\0';
 		printf( "\rReceived : %s\n\n", buffer );
 	}
