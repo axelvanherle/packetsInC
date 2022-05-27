@@ -114,6 +114,7 @@ int main( int argc, char * argv[] )
 			printf(" \\______/   \\___/   \\_______/|__/         \\___/   \\_______/ \\_______/\n\n");
 	printf("========================================================================================\n\n\n\n");
 	printf("You can now type and receive messages. Have fun!\n");
+	
 	//Create my threads and run those suckers.
 	pthread_t p1, p2;
     if (pthread_create(&p1, NULL, &sendThread, NULL) != 0) {

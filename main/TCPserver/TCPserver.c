@@ -42,7 +42,7 @@
 
 char buf[256];    // This variable saves the client message.
 int nbytes;		// This variable saves the amound of chars that are in the client message.
-char latest16Messages[1000];    //This variable is used to store the latest 16 messages pulled from the HTTP server.
+char latest16Messages[1000];    // This variable is used to store the latest 16 messages pulled from the HTTP server.
 
 //These functions are to send whats in "buf" to the HTPP server.
 int initializationMsg();
@@ -237,7 +237,7 @@ int main(void)
 						*	WAKE UP! We just got some data from a client. Let's do this shit.
 						*/
 
-						//Sends the message to the HTTP server. (Also manipulates the string, no fucking clue if this is needed but i dont want to spend more time on it).
+						//Sends the message to the HTTP server. (Also manipulates the string).
 						sendMsgToHttp();
 						
                         for(j = 0; j <= fdmax; j++) 

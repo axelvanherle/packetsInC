@@ -1,11 +1,3 @@
-
-/*
-*
-*   Code written by Axel Vanherle.
-*   Sends a UDP packet to localhost on port 50000 via IPV4.
-*
-*/
-
 #ifdef _WIN32
     
 	#define _WIN32_WINNT _WIN32_WINNT_WIN7
@@ -50,7 +42,7 @@ void execution( int internet_socket, struct sockaddr * internet_address, socklen
 void cleanup( int internet_socket, struct sockaddr * internet_address );
 
 int main( int argc, char * argv[] )
-{
+{	
 	OSInit();
 
 	struct sockaddr * internet_address = NULL;
@@ -111,24 +103,29 @@ int initialization( struct sockaddr ** internet_address, socklen_t * internet_ad
 }
 
 void execution( int internet_socket, struct sockaddr * internet_address, socklen_t internet_address_length )
-{
+{	
+	//Self exaplanitory var names.
 	int amountOfPacketsToSend = 0;
 	int lenghtOfContentPacketToSend;
 	char contentPacketToSend[180] = {};
 	printf("How many packets do you want to send?\n");
 	scanf("%d",&amountOfPacketsToSend);
 
+	//Gets the content of the packet.
+	//gets instead of scanf because scanf cant do spaces (unless you do scanf[^ ] or whatever but i dont remember and dont want to find out, ill just use gets).
 	printf("What should the content of the packet be?\n");
 	fflush(stdin);
 	gets(contentPacketToSend);
 
 	//Adds NUL terminator to the end of the stings and gets the bytes for sendto function.
+	//This isnt needed, i just do it to be sure.
+	//strlen counts up to the latest NUL terminator so there is already one there.
 	lenghtOfContentPacketToSend = strlen(contentPacketToSend);
 	contentPacketToSend[lenghtOfContentPacketToSend] = '\0';
 	
 	printf("\nSending %s %d times.\n",contentPacketToSend, amountOfPacketsToSend);
 
-
+	//I dont need to do it like this, its better to check if every packet got sent but i'm too lazy to change it now. It works.
 	int number_of_bytes_send = 0;
 	number_of_bytes_send = sendto( internet_socket, contentPacketToSend, lenghtOfContentPacketToSend, 0, internet_address, internet_address_length );
 	if( number_of_bytes_send == -1 )
@@ -158,6 +155,7 @@ void execution( int internet_socket, struct sockaddr * internet_address, socklen
 		printf("Received : %s\n", buffer );
 	}
 
+	//Lets the user know were done here.
 	printf("Shutting down.");
 }
 

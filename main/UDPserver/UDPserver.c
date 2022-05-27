@@ -189,8 +189,8 @@ void execution( int internet_socket )
 	{	
 		/*
 		*	These are to read the data of the string sent from the phone app, save them into workable doubles.
-		*	Example of a string sent from the phone app and also tells you where i save them.
 		*
+		*	Example of a string sent from the phone app and also tells you where i save them.
 		*	232.75048, 3,  5.364, -3.278, 2.443, 4, -1.222, 0.001, -6.664, 5, -465.654, -654.654, 150.644
 		*	trash,trash,stats1[0],stats1[1],stats1[2],trash,stats2[0],stats2[1],stats2[2],trash,stats3[0],stats3[1],stats3[2]
 		*/
@@ -211,6 +211,7 @@ void execution( int internet_socket )
 		double stats2Min[3] = {DBL_MAX,DBL_MAX,DBL_MAX,};
 		double stats3Min[3] = {DBL_MAX,DBL_MAX,DBL_MAX,};
 
+		//Average gets saved here, and i dont need to do checks so i dont care what its initialed to.
 		double stats1Avg[3];
 		double stats2Avg[3];
 		double stats3Avg[3];
@@ -244,10 +245,11 @@ void execution( int internet_socket )
 		else if (userChoiceTimeout == 2)
 		{	
 			fprintf(OUTPUTFILESTATS,"User chose the standard timeout of 10 seconds.\n",timeout);
-			//Do nothing
+			//User chose the standard timeout so we dont want to change the value.
 		}
 		else
 		{
+			//Simply checks if the user entered 1 or 2.
 			fprintf(OUTPUTFILESTATS,"User chose a wrong option in timeout selection. Stopping now.\n");
 			printf("\n\n\n-----------------------------------------\n");
 			printf("ERROR: please choose either 1 or 2.\n");
@@ -255,6 +257,7 @@ void execution( int internet_socket )
 			exit(-1);
 		}
 
+		//Gets the amount of packets to receive and saves that information into a text file.
 		printf("\nHow many packets do you want to receive?: ");
 		scanf("%d",&amountOfPacketsToReceive);
 		fprintf(OUTPUTFILESTATS,"User chose to receive %d packets.\n",amountOfPacketsToReceive);
@@ -283,6 +286,7 @@ void execution( int internet_socket )
 				printf( "Packet [ %d ]: %s\n",amountOfPacketsToReceive, buffer);
 				fprintf(OUTPUTFILE,"Packet [ %d ]: %s\n",amountOfPacketsToReceive, buffer);
 
+				//Saves the incomming sting buffer into the previously declared variables. 
 				sscanf(buffer, "%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf",&trash,&trash,&stats1[0],&stats1[1],&stats1[2],&trash,&stats2[0],&stats2[1],&stats2[2],&trash,&stats3[0],&stats3[1],&stats3[2]);
 
 				//Gets the max for stats1-3.
@@ -367,15 +371,18 @@ void execution( int internet_socket )
 		}
 
 		for (size_t i = 0; i < 3; i++)
-		{
+		{	
+			//This is why, and this is also how i get my average. It's a lazy way, but it works.
 			stats1Avg[i] = stats1Avg[i] / numberOfPacketsReceived;
 			stats2Avg[i] = stats2Avg[i] / numberOfPacketsReceived;
 			stats3Avg[i] = stats3Avg[i] / numberOfPacketsReceived;
 		}
 
+		//End the clock and get calculate how long it took.
 		clock_t end = clock();
     	double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
 
+		//Print that and save it into the file.
     	printf("\n\nTime between first and last packet: %f seconds.\n",time_spent);
 		fprintf(OUTPUTFILESTATS,"\n\nTime between first and last packet: %f seconds.\n",time_spent);
 
@@ -384,12 +391,16 @@ void execution( int internet_socket )
 		packetLossCounterTimeoutPrint = amountOfPacketsToReceivePrint - packetLossCounterTimeoutPrint;
 		packetLossCounterTimeoutPercentage = 100.0 * (amountOfPacketsToReceivePrint - packetLossCounterTimeoutPrint) / amountOfPacketsToReceivePrint;
 
+		//Print those calculations and saves that into the file aswell.
 		printf("You expected %d packets, due to timeouts you only received %d packets. That is a %.2f%% loss.\n",amountOfPacketsToReceivePrint,packetLossCounterTimeoutPrint,packetLossCounterTimeoutPercentage);
 		fprintf(OUTPUTFILESTATS,"You expected %d packets, due to timeouts you only received %d packets. That is a %.2f%% loss.",amountOfPacketsToReceivePrint,packetLossCounterTimeoutPrint,packetLossCounterTimeoutPercentage,time_spent);
 
 		printf("\nParsed values:\n\n");
 		fprintf(OUTPUTFILESTATS,"\nParsed values:\n\n");
 
+		/*
+		*	The long code found bellow this is for printing the parsed values and saving them into the csv file.
+		*/
 		printf("Bellow you find the parsed values for stats1:\n");
 		printf("The max values:\n");
 		for (int i = 0; i < 3; i++)		
