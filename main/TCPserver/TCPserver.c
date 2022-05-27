@@ -44,7 +44,7 @@ char buf[256];    // This variable saves the client message.
 int nbytes;		// This variable saves the amound of chars that are in the client message.
 char latest16Messages[1000];    // This variable is used to store the latest 16 messages pulled from the HTTP server.
 
-//These functions are to send whats in "buf" to the HTPP server.
+//These functions are to send whats in "buf" to the HTTP server.
 int initializationMsg();
 void executionMsg( int );
 void cleanupMsg( int );
@@ -148,7 +148,7 @@ int main(void)
     fdmax = listener; // so far, it's this one
 
     // main loop
-    for(;;) 
+    while(1) 
 	{
         read_fds = master; // copy it
         if (select(fdmax+1, &read_fds, NULL, NULL, NULL) == -1)
