@@ -65,10 +65,12 @@ void getHttpReqNoP();
 //This function gets sockaddr, IPv4 or IPv6.
 void *get_in_addr(struct sockaddr *sa);
 
+void printIntro (void);
+
 int main(void)
 {
 	OSInit();
-
+	printIntro();
 	//Gets latest 16 messages fromt he HTTP server.
 	getHttpReq();
 	printf("\n\n\nThose are the latest 16 messages saved on the HTTP server.\n");
@@ -275,6 +277,31 @@ void *get_in_addr(struct sockaddr *sa)
     }
 
     return &(((struct sockaddr_in6*)sa)->sin6_addr);
+}
+
+void printIntro(void)
+{
+	printf("========================================================================================\n\n");
+		printf(" /$$$$$$                                                            \n");
+		printf("/$$__  $$                                                           \n");
+		printf(" $$  \\__/  /$$$$$$   /$$$$$$  /$$    /$$ /$$$$$$   /$$$$$$          \n");
+		printf("  $$$$$$  /$$__  $$ /$$__  $$|  $$  /$$//$$__  $$ /$$__  $$         \n");
+		printf("\\____  $$| $$$$$$$$| $$  \\__/ \\  $$/$$/| $$$$$$$$| $$  \\__/         \n");
+		printf("/$$  \\ $$| $$_____/| $$        \\  $$$/ | $$_____/| $$               \n");
+		printf("  $$$$$$/|  $$$$$$$| $$         \\  $/  |  $$$$$$$| $$               \n");
+		printf("\\______/  \\_______/|__/          \\_/    \\_______/|__/               \n");
+		printf("\n");
+		printf("\n");
+		printf("\n");
+		printf(" /$$$$$$   /$$                           /$$                     /$$\n");
+		printf("/$$__  $$ | $$                          | $$                    | $$\n");
+		printf(" $$  \\__//$$$$$$    /$$$$$$   /$$$$$$  /$$$$$$    /$$$$$$   /$$$$$$$\n");
+		printf("  $$$$$$|_  $$_/   |____  $$ /$$__  $$|_  $$_/   /$$__  $$ /$$__  $$\n");
+		printf("\\____  $$ | $$      /$$$$$$$| $$  \\__/  | $$    | $$$$$$$$| $$  | $$\n");
+		printf("/$$  \\ $$ | $$ /$$ /$$__  $$| $$        | $$ /$$| $$_____/| $$  | $$\n");
+		printf("  $$$$$$/ |  $$$$/|  $$$$$$$| $$        |  $$$$/|  $$$$$$$|  $$$$$$$\n");
+		printf("\\______/   \\___/   \\_______/|__/         \\___/   \\_______/ \\_______/\n\n");
+	printf("========================================================================================\n\n");
 }
 
 /*
