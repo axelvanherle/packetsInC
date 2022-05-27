@@ -2,66 +2,65 @@
 
 ![udptcp](https://user-images.githubusercontent.com/94362354/168884092-4e8151e9-5413-4cc0-aa1b-f526f54781b5.png)
 
-### Opdracht:
-Je maakt een 4 applicaties (UDP Client, UDP Server, TCP Client en TCP Server) die via Berkley sockets in C met elkaar over internet kunnen communiceren. De 2 Server applicaties en de 2 Client applicaties mogen op je laptop draaien.
+### Assignment:
+You make 4 applications (UDP Client, UDP Server, TCP Client and TCP Server) that can communicate with each other over the internet via Berkley sockets in C. The 2 Server applications and the 2 Client applications may run on your laptop.
 
 #### UDP Smartphone sensor stream analyzer (15%) [App]
 
-##### Welke onderdelen zijn behaald van de UDP Client ?
+##### Which parts have been achieved from the UDP Client?
  
- - [X] Werkende Client applicatie die aantal te sturen packetten via UDP stuurt (bewijs Packet Sender) [2/15]
+ - [X] Working Client application that sends number of packets to send via UDP (proof Packet Sender) [2/15]
  
-##### Welke onderdelen zijn behaald van de UDP Server ?
+##### Which parts have been achieved from the UDP Server?
  
- - [X] Werkende Server applicatie die gegevens via UDP ontvangt (bewijs Packet Sender) [2/15]
+ - [X] Working Server application receiving data via UDP (Evidence Packet Sender) [2/15]
  
- - [X] CSV van ontvangen stream wordt aangemaakt [1/15]
+ - [X] CSV of received stream is created [1/15]
  
- - [X] Het aantal pakketten dat ontvangen is wordt bijgehouden [1/15]
+ - [X] Tracks the number of packets received [1/15]
  
- - [X] Er is een aantal te ontvangen pakketten in te stellen [1/15]
+ - [X] Set a number of packets to receive [1/15]
  
- - [X] Het tijdsverschil tussen eerste en laatste pakket wordt getoond [1/15]
+ - [X] The time difference between first and last packet is shown [1/15]
  
- - [X] *Er is een time-out in te stellen [2/15]
+ - [X] *Timeout can be set [2/15]
  
- - [X] *Bij time-out het aantal effectief ontvangen t.o.v. verwacht aantal wordt getoond met berekening van packetloss [2/15]
+ - [X] *When timed out the number actually received versus expected number is shown with packet loss calculation [2/15]
  
- - [X] *De gegevens worden op de server geparsed en een min, max en avg worden bijgehouden [2/15]
+ - [X] *The data is parsed on the server and a min, max and avg is kept [2/15]
  
- - [X] *Statistische gegevens worden in een bestand bewaard [1/15]
+ - [X] *Statistical data is kept in a file [1/15]
  
-#### TCP Chatbox met geschiedenis via HTTP (25%)
+#### TCP Chatbox with history via HTTP (25%)
 
-##### Welke onderdelen zijn behaald van de TCP Client ?
+##### Which parts have been achieved from the TCP Client?
  
- - [X] Client kan TCP connectie maken (bewijs via WireShark) [1/25]
+ - [X] Client can make TCP connection (proof via WireShark) [1/25]
  
- - [X] Client kan TCP packetten succesvol sturen en ontvangen (bewijs via WireShark) [1/25]
+ - [X] Client can successfully send and receive TCP packets (proof via WireShark) [1/25]
  
- - [X] Client stuurt de door de gebruiker ingegeven berichten door (bewijs Packet Sender) [1/25]
+ - [X] Client forwards the messages entered by the user (Proof Packet Sender) [1/25]
  
- - [X] *Er kan tegelijk berichten gestuurd en ontvangen worden op de Client zonder afgesproken beurtrol (e.g. multi-threaded) [4/25]
+ - [X] *Messages can be sent and received simultaneously on the Client without an agreed rotational role (e.g. multi-threaded) [4/25]
  
- ##### Welke onderdelen zijn behaald van de TCP Server ?
+ ##### Which parts have been achieved from the TCP Server?
  
- - [X] Server kan luisteren naar een poort voor inkomende TCP connecties [1/25]
+ - [X] Server can listen to a port for incoming TCP connections [1/25]
  
-- [X]  Server accepteert verbinding en praat met verbonden client over TCP [1/25]
+- [X] Server accepts connection and talks to connected client over TCP [1/25]
  
-- [X]  Server applicatie stuurt ontvangen bericht door naar alle andere deelnemers [1/25]
+- [X] Server application forwards received message to all other participants [1/25]
  
-- [X]  Server stuurt niet naar de afzender zijn eigen bericht [1/25]
+- [X] Server does not send to sender its own message [1/25]
  
-- [X]  Server stuurt de afzender informatie mee met het bericht (i.e. IP-adres + poort van zender) OF Server stuurt de informatie van nieuwe client connectie naar alle andere geconnecteerde clients (i.e. IP-adres + poort van zender) [2/25]
+- [X] Server sends the sender information along with the message (i.e. IP address + sender's port) OR Server sends the information of new client connection to all other connected clients (i.e. IP address + sender's port) [2/ 25]
  
-- [X]  Server stuurt de laatste 16 chatberichten naar de client bij nieuwe verbinding [2/25]
+- [X] Server sends the last 16 chat messages to the client on new connection [2/25]
  
-- [x]  Server kan HTTP communicatie uitvoeren met de webserver (bewijs via WireShark) [2/25]
+- [x] Server can perform HTTP communication with the web server (proof via WireShark) [2/25]
  
- - [X] *Server stuurt over HTTP de chatberichten door naar de webserver (bewijs via WireShark) [2/25]
+ - [X] *Server forwards the chat messages over HTTP to the web server (proof via WireShark) [2/25]
  
-- [x]  *Server vraagt de laatste 16 chatberichten via HTTP aan de webserver (bij start) [2/25]
+- [x] *Server requests the last 16 chat messages via HTTP to the web server (at startup) [2/25]
  
- - [X] *Er kunnen meerdere Clients simultaan verbonden zijn en chatten met elkaar (i.e. assynchroon of synchroon verwerkt op de server) [4/25]
- 
+ - [X] *Multiple Clients can be simultaneously connected and chatting with each other (i.e. processed asynchronously or synchronously on the server) [4/25]
