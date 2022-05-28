@@ -1,3 +1,3 @@
-#### Video displaying how the code works.
+#### Video displaying how the code works:
 
-ttps://youtu.be/SaHRCfn7A-s
+https://youtu.be/SaHRCfn7A-s
