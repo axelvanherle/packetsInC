@@ -1,32 +1,32 @@
 User chose a set amount of packets to receive.
-User chose a custom timeout of 3 seconds.
-User chose to receive 150 packets.
+User chose a custom timeout of 1 seconds.
+User chose to receive 50 packets.
 
 
-Time between first and last packet: 25.387000 seconds.
-You expected 150 packets, due to timeouts you only received 145 packets. That is a 3.33% loss.
+Time between first and last packet: 28.688000 seconds.
+You expected 50 packets, due to timeouts you only received 29 packets. That is a 42.00% loss.
 Parsed values:
 
 Bellow you find the parsed values for stats1:
 The max values:
-78.597000, 44.523000, 66.358000, 
+5.364000, -1.278000, 5.443000, 
 The min values:
--38.173000, -74.670000, -78.290000, 
+1.364000, -3.278000, 2.443000, 
 The average values:
-12.703455, -11.074097, 2.200434, 
+3.019172, -2.312483, 3.891276, 
 
 Bellow you find the parsed values for stats2:
 The max values:
-23.446000, 11.189000, 13.606000, 
+-1.222000, 0.001000, -6.664000, 
 The min values:
--18.656000, -19.947000, -16.811000, 
+-1.222000, 0.001000, -6.664000, 
 The average values:
-0.333628, -0.076759, -0.226966, 
+-1.222000, 0.001000, -6.664000, 
 
 Bellow you find the parsed values for stats3:
 The max values:
-0.000000, 89.625000, 259.875000, 
+-465.654000, -654.654000, 150.644000, 
 The min values:
--418.938000, 0.000000, 0.000000, 
+-465.654000, -654.654000, 150.644000, 
 The average values:
--388.815759, 53.195966, 201.038607, 
+-465.654000, -654.654000, 150.644000, 
