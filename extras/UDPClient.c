@@ -1,6 +1,3 @@
-/*
-*   Used to make the code portable on win and linux based machine's.
-*/
 #ifdef _WIN32
 //If we are on a windows machine, use this.
 	#define _WIN32_WINNT _WIN32_WINNT_WIN7
@@ -43,7 +40,7 @@
 
 int userChoiceMenu = -1;
 
-void sendPacket (void);
+void sendPacket (int userChoiceMenu);
 void printIntro (void);
 int printMenu (void);
 int initialization( struct sockaddr ** internet_address, socklen_t * internet_address_length );
@@ -53,7 +50,12 @@ void cleanup( int internet_socket, struct sockaddr * internet_address );
 int main( int argc, char * argv[] )
 {
     printIntro();
-    userChoiceMenu = printMenu();
+	while (1)
+	{
+		userChoiceMenu = printMenu();
+		sendPacket(userChoiceMenu);
+	}
+
 	return 0;
 }
 
@@ -62,20 +64,27 @@ int printMenu (void)
     int userChoice;
     printf("What are we doing today boss?\n");
     printf("[1] Just send me some damn packets!\n");
-    printf("-Choose the content of the packet, how many of them to send, the ip and port of the server you want to flood.\n");
+    printf("- Choose the content of the packet, how many of them to send, the ip and port of the server you want to flood.\n");
+	printf("-(i) You set the ip and port.");
     scanf("%d",&userChoice);
     return userChoice;
 }
 
-void sendPacket (void)
+void sendPacket (userChoiceMenu)
 {
-    OSInit();
+	OSInit;
 	struct sockaddr * internet_address = NULL;
 	socklen_t internet_address_length = 0;
+
+	if (userChoiceMenu == 1)
+	{
+		system("cls");
+		printf("Enter the ip and port you want to flood.\n");
+	}
+	
+
 	int internet_socket = initialization( &internet_address, &internet_address_length );
-
 	execution( internet_socket, internet_address, internet_address_length );
-
 	cleanup( internet_socket, internet_address );
 }
 
