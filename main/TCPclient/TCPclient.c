@@ -1,3 +1,7 @@
+/*
+*	Standard includes ETC.
+*/
+
  #ifdef _WIN32
 	#define _WIN32_WINNT _WIN32_WINNT_WIN7
 	#include <winsock2.h> //for all socket programming
@@ -39,20 +43,21 @@
 
 int internet_socket; //Made global so both of my threads can see it.
 
+//Standard TCP client functions.
 int initialization();
 void execution( int internet_socket );
 void cleanup( int internet_socket );
 
 //thread used to send messages.
 void* sendThread() {
+	//We want to be able to send messages infinitly.
 	while (1)
 	{
    		int lenghtOfContentPacketToSend;
 		char contentPacketToSend[180]; 
-   	
-		gets(contentPacketToSend);
 
-		//Adds /0 terminator to the end of the stings and gets the bytes for sendto function
+		gets(contentPacketToSend);
+		//Adds /r terminator to the end of the stings and gets the bytes for sendto function
 		lenghtOfContentPacketToSend = strlen(contentPacketToSend);
 		contentPacketToSend[lenghtOfContentPacketToSend] = '\r';
 
@@ -68,6 +73,7 @@ void* sendThread() {
 
 //thread used to receive messages.
 void* receiveThread() {
+	//We want to be able to receive messages infinitly.
 	while (1)
 		{
 		int number_of_bytes_received = 0;
@@ -130,6 +136,8 @@ int main( int argc, char * argv[] )
     if (pthread_join(p2, NULL) != 0) {
         return 4;
     }
+
+	//You should never get here.
 
 	cleanup( internet_socket );
 
